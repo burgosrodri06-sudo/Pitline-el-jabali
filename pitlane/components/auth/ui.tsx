@@ -21,9 +21,10 @@ type FieldProps = {
   type?: string;
   autoComplete?: string;
   error?: string;
+  defaultValue?: string;
 };
 
-export function AuthField({ label, name, type = "text", autoComplete, error }: FieldProps) {
+export function AuthField({ label, name, type = "text", autoComplete, error, defaultValue }: FieldProps) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-medium">{label}</span>
@@ -32,6 +33,7 @@ export function AuthField({ label, name, type = "text", autoComplete, error }: F
         name={name}
         type={type}
         autoComplete={autoComplete}
+        defaultValue={defaultValue}
         aria-invalid={error ? true : undefined}
         className={
           "w-full rounded-md border bg-[#1A1A1A] px-3 py-3 text-base outline-none " +
