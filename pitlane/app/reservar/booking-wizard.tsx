@@ -17,11 +17,11 @@ function SummaryRow({ label, children }: { label: string; children: ReactNode })
   return <div className={styles.summaryRow}><dt>{label}</dt><dd>{children}</dd></div>;
 }
 
-export default function BookingWizard() {
-  const [step, setStep] = useState(0);
-  const [dateId, setDateId] = useState<string>();
-  const [slotId, setSlotId] = useState<string>();
-  const [packageId, setPackageId] = useState<string>();
+export default function BookingWizard({ initial = {} }: { initial?: { dateId?: string; slotId?: string; packageId?: string } }) {
+  const [step, setStep] = useState(initial.packageId ? 3 : initial.slotId ? 2 : initial.dateId ? 1 : 0);
+  const [dateId, setDateId] = useState<string | undefined>(initial.dateId);
+  const [slotId, setSlotId] = useState<string | undefined>(initial.slotId);
+  const [packageId, setPackageId] = useState<string | undefined>(initial.packageId);
   const [paymentNotice, setPaymentNotice] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const date = eventDates.find((item) => item.id === dateId);
