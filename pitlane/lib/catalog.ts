@@ -67,3 +67,7 @@ export function bookingHref(
   if (packageId) q.set("paquete", packageId);
   return `/reservar?${q}`;
 }
+// Fixed-format USD keeps server and browser output identical.
+export function money(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}

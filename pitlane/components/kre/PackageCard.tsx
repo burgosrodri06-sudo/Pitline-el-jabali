@@ -1,50 +1,44 @@
 "use client";
 import { cx } from "./styles";
 import type { Package } from "@/domain/events/types";
-import { Check, ArrowUpRight } from "./Icons";
+import { money } from "@/lib/catalog";
+// One package row. `seatsLeft` is the selected slot's availability, when known,
+// so an oversized package explains itself before the driver tries to commit.
 export function PackageCard({
   item,
   selected,
+  seatsLeft,
   onSelect,
 }: {
   item: Package;
   selected: boolean;
+  seatsLeft?: number;
   onSelect: (id: string) => void;
 }) {
+  const fits = seatsLeft === undefined || seatsLeft >= item.participants;
   return (
-    <article className={cx(`package-card ${selected ? "selected" : ""}`)}>
-      <small className={cx("eyebrow")}>
-        {item.participants > 1
-          ? "COMPARTE LA EXPERIENCIA"
-          : "TU TIEMPO EN PISTA"}
-      </small>
-      <h3>{item.name}</h3>
-      <p className={cx("price")}>
-        {new Intl.NumberFormat("es-SV", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        }).format(item.priceCents / 100)}
-        <span> / paquete</span>
-      </p>
-      <p>
-        <Check size={16} aria-hidden="true" /> {item.participants}{" "}
-        {item.participants === 1 ? "persona" : "personas"}
-      </p>
-      <p>
-        <Check size={16} aria-hidden="true" /> {item.sessionsPerPerson}{" "}
-        {item.sessionsPerPerson === 1 ? "tanda" : "tandas"} por persona ·{" "}
-        {item.minutesPerSession} min c/u
-      </p>
-      <button
-        className={cx("button secondary")}
-        disabled={!item.active}
-        aria-pressed={selected}
-        onClick={() => onSelect(item.id)}
-      >
-        {selected ? "Paquete seleccionado" : "Elegir paquete"}
-        <ArrowUpRight size={17} aria-hidden="true" />
-      </button>
-    </article>
+    <button
+      type="button"
+      className={cx(`row package-row ${selected ? "selected" : ""}`)}
+      disabled={!item.active || !fits}
+      aria-pressed={selected}
+      onClick={() => onSelect(item.id)}
+    >
+      <span className={cx("package-name")}>
+        <strong>{item.name}</strong>
+        <span className={cx("muted")}>
+          {item.participants} {item.participants === 1 ? "kart" : "karts"} ·{" "}
+          {item.sessionsPerPerson}{" "}
+          {item.sessionsPerPerson === 1 ? "tanda" : "tandas"} de{" "}
+          {item.minutesPerSession} min
+        </span>
+        {!fits && (
+          <span className={cx("row-note")}>
+            Necesita {item.participants} karts; esta tanda tiene {seatsLeft}.
+          </span>
+        )}
+      </span>
+      <span className={cx("num price")}>{money(item.priceCents)}</span>
+    </button>
   );
 }

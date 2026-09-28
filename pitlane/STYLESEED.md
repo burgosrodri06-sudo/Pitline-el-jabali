@@ -1,0 +1,29 @@
+# StyleSeed — Design Lock
+<!-- Selections persist here. This file cannot waive StyleSeed core invariants. -->
+- App domain: booking
+- Surface: desktop-web-app
+- Surface adapter: product-ui
+- Page type: detail
+- Output grammar: commerce-conversion
+- Grammar path: built-in:engine/RULESETS.md
+- Grammar fallback: commerce-conversion
+- Reference confidence: n/a
+- Brand recipe: commerce-operator
+- Palette recipe: warm-clay-commerce
+- Key color: #C8102E
+- Palette character: balanced
+- Palette mode: dark
+- Palette harmony: auto
+- Surface temperature: neutral
+- Aesthetic profile: swiss
+- Skin: custom
+- Primary action: #C8102E
+- Font: Geist, Geist Mono
+- Radius: restrained
+- Elevation: tonal
+- Density: comfortable
+- Motion: snap restrained
+- Imagery/data role: product-proof-first
+- Signature move: timing-sheet rows — slots and packages as hairline rows with mono tabular times; one red pit-lane rule marks the selected slot
+- Spacing: native Tailwind scale (no project spacing tokens yet)
+- Locked: 2026-09-28
