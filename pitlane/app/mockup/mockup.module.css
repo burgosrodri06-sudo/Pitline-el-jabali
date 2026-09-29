@@ -1,0 +1,406 @@
+/* Mockup-only overrides of the StyleSeed role names (.styleseed/palette.css is
+   generated and untouched). Brand: #C8102E is the single accent; everything
+   else is pure grey. White on #C8102E = 5.88:1 (AA). Red is never used as
+   small text: #C8102E on these surfaces is ~3.3:1, valid only for fills and rules.
+   Mobile-first: base styles target 360px. */
+.root {
+  --ss-background: #0a0a0a;
+  --ss-surface: #111111;
+  --ss-chrome: #1a1a1a;
+  --ss-foreground: #f4f4f4;
+  --ss-muted-foreground: #a3a3a3;
+  --ss-chrome-foreground: #f4f4f4;
+  --ss-border: #2a2a2a;
+  --ss-primary: #c8102e;
+  --ss-primary-foreground: #ffffff;
+  --ss-focus: #f4f4f4;
+  --mk-border-strong: #3d3d3d;
+  --mk-primary-hover: #a80d27;
+  --mk-radius: 6px;
+  --mk-duration: 120ms;
+  --mk-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  min-height: 100vh;
+  background: var(--ss-background);
+  color: var(--ss-foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color-scheme: dark;
+}
+.root * {
+  box-sizing: border-box;
+}
+:where(.root) :where(h1, h2, h3, p, dl, dd, ol, ul) {
+  margin: 0;
+}
+.root :focus-visible {
+  outline: 2px solid var(--ss-focus);
+  outline-offset: 3px;
+}
+.num {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ss-muted-foreground);
+}
+.skip {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 10;
+  padding: 12px 16px;
+  border-radius: var(--mk-radius);
+  background: var(--ss-foreground);
+  color: var(--ss-background);
+}
+.skip:focus {
+  top: 16px;
+}
+.banner {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--ss-border);
+  background: var(--ss-surface);
+  font-size: 12px;
+  text-align: center;
+  color: var(--ss-muted-foreground);
+}
+.header,
+.layout,
+.footer {
+  width: calc(100% - 32px);
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.header {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-bottom: 1px solid var(--ss-border);
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--ss-primary);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.brand small {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ss-muted-foreground);
+}
+
+.layout {
+  display: grid;
+  gap: 32px;
+  padding-block: 24px 48px;
+}
+.intro h1 {
+  margin-top: 8px;
+  text-wrap: balance;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* Booking panel: the single commitment point */
+.panel {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--mk-border-strong);
+  border-radius: var(--mk-radius);
+  background: var(--ss-surface);
+}
+.session {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ss-border);
+}
+.factWide {
+  grid-column: 1 / -1;
+}
+.facts dt {
+  font-size: 13px;
+  color: var(--ss-muted-foreground);
+}
+.facts dd {
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 500;
+}
+.price {
+  font-size: 24px;
+  line-height: 1.2;
+}
+.unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ss-muted-foreground);
+}
+.cta {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: var(--mk-radius);
+  background: var(--ss-primary);
+  color: var(--ss-primary-foreground);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--mk-duration) var(--mk-ease);
+}
+.cta:hover {
+  background: var(--mk-primary-hover);
+}
+.help {
+  font-size: 13px;
+  color: var(--ss-muted-foreground);
+}
+
+/* Schedule: timing-sheet rows */
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+}
+.root h2:not(.eyebrow) {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.sectionHead p {
+  font-size: 14px;
+  color: var(--ss-muted-foreground);
+}
+.rows {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ss-border);
+}
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "time price"
+    "session price"
+    "seats price";
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 2px;
+  min-height: 56px;
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid var(--ss-border);
+}
+.rowNext {
+  background: var(--ss-surface);
+}
+.rowNext::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--ss-primary);
+}
+.time {
+  grid-area: time;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.rowSession {
+  grid-area: session;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.tag {
+  padding: 0 6px;
+  border: 1px solid var(--mk-border-strong);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ss-foreground);
+}
+.rowSeats {
+  grid-area: seats;
+  font-size: 13px;
+  color: var(--ss-muted-foreground);
+}
+.rowPrice {
+  grid-area: price;
+  display: grid;
+  justify-items: end;
+  font-size: 15px;
+  text-align: right;
+}
+.rowFull .time,
+.rowFull .rowSession,
+.rowFull .rowPrice {
+  color: var(--ss-muted-foreground);
+}
+
+/* How it works */
+.how ol {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.how li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.how li::before {
+  content: counter(step);
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--mk-border-strong);
+  border-radius: var(--mk-radius);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 14px;
+}
+.how h3 {
+  padding-top: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.how p {
+  font-size: 15px;
+  color: var(--ss-muted-foreground);
+}
+
+/* Cancellation policy */
+.policy {
+  padding: 16px;
+  border: 1px solid var(--ss-border);
+  border-radius: var(--mk-radius);
+}
+.policy p {
+  max-width: 62ch;
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--ss-muted-foreground);
+}
+.policy .sample {
+  font-size: 12px;
+}
+.footer {
+  padding-block: 24px;
+  border-top: 1px solid var(--ss-border);
+  font-size: 13px;
+  color: var(--ss-muted-foreground);
+}
+
+@media (min-width: 600px) {
+  .banner {
+    font-size: 13px;
+  }
+  .header,
+  .layout,
+  .footer {
+    width: calc(100% - 48px);
+  }
+  .intro h1 {
+    font-size: 40px;
+  }
+  .panel {
+    padding: 24px;
+  }
+  .row {
+    grid-template-columns: 112px minmax(0, 1fr) auto 88px;
+    grid-template-areas: "time session seats price";
+  }
+  .rowSeats {
+    font-size: 14px;
+    text-align: right;
+  }
+  .time,
+  .rowSession,
+  .rowPrice,
+  .how p,
+  .policy p {
+    font-size: 16px;
+  }
+}
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-areas:
+      "intro panel"
+      "schedule panel"
+      "how panel"
+      "policy panel";
+    align-items: start;
+    column-gap: 48px;
+    padding-block: 40px 64px;
+  }
+  .intro {
+    grid-area: intro;
+  }
+  .panel {
+    grid-area: panel;
+    position: sticky;
+    top: 24px;
+  }
+  .schedule {
+    grid-area: schedule;
+  }
+  .how {
+    grid-area: how;
+  }
+  .policy {
+    grid-area: policy;
+  }
+  .intro h1 {
+    font-size: 48px;
+    line-height: 1.05;
+  }
+  .how ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    transition: none !important;
+  }
+}
