@@ -1,11 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { AuthTitle, primaryButton } from "@/components/auth/ui";
+import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "../errors";
+
+// registro guarda el correo en sessionStorage antes de redirigir aquí.
+function readSignupEmail() {
+  try {
+    return sessionStorage.getItem("pitlane:signup-email") ?? "";
+  } catch {
+    return ""; // Sin sessionStorage: se le pide el correo al usuario.
+  }
+}
+
+const noSubscribe = () => () => {};
 
 export default function VerificarCorreoPage() {
   const [resent, setResent] = useState(false);
+  const [error, setError] = useState("");
+  // null en el servidor; "" = no hay correo guardado y se muestra el campo.
+  const storedEmail = useSyncExternalStore(noSubscribe, readSignupEmail, () => null);
+
+  async function handleResend(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const email = storedEmail || String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    if (!email.includes("@")) {
+      setError("Escribe un correo válido.");
+      return;
+    }
+
+    const { error } = await createClient().auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/login` },
+    });
+
+    if (error) {
+      setError(translateAuthError(error));
+      return;
+    }
+
+    setError("");
+    setResent(true);
+  }
 
   return (
     <>
@@ -23,15 +62,19 @@ export default function VerificarCorreoPage() {
           Ya verifiqué mi correo
         </Link>
 
-        {/* TODO: reenviar con Supabase Auth. Por ahora solo cambia el mensaje. */}
-        <button
-          type="button"
-          onClick={() => setResent(true)}
-          disabled={resent}
-          className="w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold disabled:text-[#A3A3A3]"
-        >
-          {resent ? "Correo reenviado" : "Reenviar correo"}
-        </button>
+        <form onSubmit={handleResend} noValidate className="space-y-3">
+          {storedEmail === "" && <AuthField label="Correo" name="email" type="email" autoComplete="email" />}
+
+          <button
+            type="submit"
+            disabled={resent}
+            className="w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold disabled:text-[#A3A3A3]"
+          >
+            {resent ? "Correo reenviado" : "Reenviar correo"}
+          </button>
+        </form>
+
+        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
       </div>
     </>
   );

@@ -4,12 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "../errors";
+
+// Solo acepta rutas internas ("/algo"), nunca "//otro-sitio.com" ni URLs completas.
+function getNextPath() {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/reservar";
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = String(data.get("email") ?? "").trim();
@@ -20,8 +28,14 @@ export default function LoginPage() {
       return;
     }
 
-    // TODO: conectar con Supabase Auth. Por ahora simula un login exitoso.
-    router.push("/reservar");
+    const { error } = await createClient().auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(translateAuthError(error));
+      return;
+    }
+
+    router.push(getNextPath());
+    router.refresh();
   }
 
   return (

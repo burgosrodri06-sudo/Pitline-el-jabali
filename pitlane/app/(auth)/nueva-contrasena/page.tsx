@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "../errors";
 
 // Pantalla a la que llega el usuario desde el enlace de "Olvidé mi contraseña".
+// El cliente de Supabase canjea el ?code= del enlace por una sesión al cargar la página.
 export default function NuevaContrasenaPage() {
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
+  const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const password = String(data.get("password") ?? "");
@@ -22,7 +26,13 @@ export default function NuevaContrasenaPage() {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    // TODO: actualizar la contraseña con Supabase Auth.
+    const { error } = await createClient().auth.updateUser({ password });
+    if (error) {
+      setError(translateAuthError(error));
+      return;
+    }
+
+    setError("");
     setSaved(true);
   }
 
@@ -44,6 +54,7 @@ export default function NuevaContrasenaPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <AuthField label="Contraseña nueva" name="password" type="password" autoComplete="new-password" error={errors.password} />
         <AuthField label="Confirma tu contraseña" name="confirm" type="password" autoComplete="new-password" error={errors.confirm} />
+        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
         <button type="submit" className={`${primaryButton} mt-2`}>
           Guardar contraseña
         </button>

@@ -4,14 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "../errors";
 
 type Errors = Partial<Record<"name" | "email" | "phone" | "password" | "confirm", string>>;
 
 export default function RegistroPage() {
   const router = useRouter();
   const [errors, setErrors] = useState<Errors>({});
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const name = String(data.get("name") ?? "").trim();
@@ -29,9 +32,30 @@ export default function RegistroPage() {
     if (confirm !== password) next.confirm = "Las contraseñas no coinciden.";
 
     setErrors(next);
+    setError("");
     if (Object.keys(next).length > 0) return;
 
-    // TODO: crear la cuenta en Supabase Auth. Por ahora pasa directo a verificación.
+    // full_name y phone van a user metadata; el trigger los copia a public.profiles.
+    const { error } = await createClient().auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name, phone },
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
+    });
+
+    if (error) {
+      setError(translateAuthError(error));
+      return;
+    }
+
+    // Guardamos el correo para que verificar-correo pueda reenviarlo.
+    try {
+      sessionStorage.setItem("pitlane:signup-email", email);
+    } catch {
+      // Sin sessionStorage, verificar-correo le pide el correo al usuario.
+    }
     router.push("/verificar-correo");
   }
 
@@ -45,6 +69,8 @@ export default function RegistroPage() {
         <AuthField label="Teléfono" name="phone" type="tel" autoComplete="tel" error={errors.phone} />
         <AuthField label="Contraseña" name="password" type="password" autoComplete="new-password" error={errors.password} />
         <AuthField label="Confirma tu contraseña" name="confirm" type="password" autoComplete="new-password" error={errors.confirm} />
+
+        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
 
         <button type="submit" className={`${primaryButton} mt-2`}>
           Crear cuenta
