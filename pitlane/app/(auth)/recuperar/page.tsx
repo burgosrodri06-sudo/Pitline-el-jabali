@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "../errors";
 
 export default function RecuperarPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
 
@@ -17,7 +19,14 @@ export default function RecuperarPage() {
       return;
     }
 
-    // TODO: enviar el enlace con Supabase Auth.
+    const { error } = await createClient().auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/nueva-contrasena`,
+    });
+    if (error) {
+      setError(translateAuthError(error));
+      return;
+    }
+
     setError("");
     setSent(true);
   }
