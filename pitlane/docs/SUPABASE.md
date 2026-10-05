@@ -62,6 +62,27 @@ Siempre `supabase.auth.getUser()`, **nunca** `getSession()` en el servidor.
 
 Nunca edites una migración que ya se aplicó; crea una nueva.
 
+## 5. Administradores
+
+Un admin es un usuario con `role = 'admin'` en `public.profiles`. Para hacer admin a alguien, cambia su `role` en el Table Editor de Supabase (desde la app nadie puede cambiar su propio `role`).
+
+**En páginas** (Server Components):
+
+```ts
+import { requireAdmin } from "@/lib/auth";
+
+const { user, profile } = await requireAdmin(); // sin sesión → /login; si no es admin → /
+```
+
+**En políticas RLS** usa `public.is_admin()`, que devuelve `true` si el usuario actual es admin:
+
+```sql
+create policy "Los admins leen todas las reservas"
+  on public.reservas for select
+  to authenticated
+  using ((select public.is_admin()));
+```
+
 ## Tablas actuales
 
 - `public.profiles`: `id`, `full_name`, `phone`, `role` (`cliente` | `admin`), `created_at`. Se crea sola al registrarse (toma `full_name` y `phone` de los metadatos del signup). Cada usuario solo lee y edita su perfil y no puede cambiar su `role`.
