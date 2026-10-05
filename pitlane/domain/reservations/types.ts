@@ -37,6 +37,12 @@ export type ReservationIntentCore = Readonly<{
   waiverVersion: string;
 }>;
 
+/** Borrador local: todavía sin versión oficial de waiver ni intento persistible. */
+export type ReservationPreparation = Pick<
+  ReservationIntentCore,
+  "participants" | "waiverAccepted"
+>;
+
 /**
  * Campos propios de la vertical. No representa una reserva completa ni una fila
  * insertable: faltan las relaciones de catálogo, que no se deben inventar.

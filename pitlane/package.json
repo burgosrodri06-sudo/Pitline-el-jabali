@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test modules/check-in/check-in.test.mjs"
+    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

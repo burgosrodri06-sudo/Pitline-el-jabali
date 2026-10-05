@@ -229,3 +229,66 @@ Las pruebas de PostgreSQL requeridas al implementar la migración son:
 No presentar tests de mocks como evidencia de atomicidad PostgreSQL. Lint,
 TypeScript, tests existentes y build comprueban compatibilidad del repositorio;
 las pruebas anteriores requieren la migración real y una DB de prueba aislada.
+
+## Segundo bloque: preparación del booking
+
+Se conservan los cuatro pasos y el diseño del wizard. En Resumen se completan
+un participante para Individual o cinco para Friends Combo, incluido el principal.
+La página intenta obtener el nombre de profiles del usuario autenticado y, si no
+está disponible, usa full_name de sus metadatos como sugerencia editable. Sin
+sesión/nombre, el campo empieza vacío. No se pasa el objeto de sesión al cliente.
+
+El estado permanece en React: no hay localStorage, escrituras en Supabase ni
+reserva creada. Cambiar de paquete ajusta los campos: al pasar a Individual se
+descartan los cuatro adicionales; al volver a Friends se piden nuevamente.
+Cambiar fecha, tanda, paquete o nombres revoca la aceptación anterior. Volver
+entre pasos sin cambiar la selección conserva el borrador.
+
+El validador de dominio en preparation.ts exige cantidad exacta, nombres de
+1–120 caracteres después de trim y aceptación explícita. El contador del catálogo
+temporal sirve solo para preparar la UI: no es un cupo confiable para la futura RPC.
+No se identifica a personas por nombre ni se prohíben nombres duplicados.
+
+No existe todavía un waiver oficial en el repositorio. La UI muestra las reglas
+de selección conocidas y una aceptación obligatoria, inicialmente desmarcada,
+indicando que es temporal y que el documento definitivo está pendiente. No se
+inventa una versión oficial ni se persiste evidencia de consentimiento. Antes de
+habilitar reservas reales se deberá mostrar el waiver publicado, obtener su
+versión confiable y validar/registrar aceptación en DB.
+
+El botón final dice «Revisar datos de reserva» y solo se habilita con datos válidos
+y aceptación. Su handler vuelve a validar las precondiciones; después muestra
+explícitamente que no se crean reservas ni se guardan los datos. Ese es el punto
+futuro de integración con el servicio, no un servicio simulado ni una respuesta
+de éxito. No se genera código de reserva, vencimiento ni clave de idempotencia.
+
+### Continuidad de autenticación, sin modificar archivos de Carlos
+
+El enlace desde el resumen construye `/login?next=...` con retorno fijo a
+`/reservar?evento=...&tanda=...&paquete=...`. El login existente ya respeta ese
+destino. Solo viajan los IDs; nunca nombres o aceptación. La página vuelve a
+validar esos IDs contra el catálogo al regresar. El usuario ve que debe iniciar
+sesión antes de completar nombres: salir de la página pierde el borrador local.
+
+La continuidad completa por registro, recuperación y verificación queda pendiente
+de Carlos. Propuesta para un cambio separado en su infraestructura:
+
+- Propagar un `next` validado por los enlaces login/registro/recuperación y el
+  retorno de verificación de correo, conservando únicamente rutas internas seguras.
+- En proxy.ts y requireAuthenticatedUser, preservar los parámetros de selección
+  además del pathname cuando el acceso protegido provoca el redirect.
+- Alinear el inicio por rol pilot con la ruta real de booking.
+
+Este bloque no modifica proxy.ts, lib/auth ni app/(auth).
+
+### Validación de este bloque
+
+`npm test` incluye las pruebas existentes de check-in y las nuevas pruebas de
+preparación: conteos 1/5, grupos incompletos, nombres, aceptación, cambios de
+cantidad y retorno seguro de login. Estas pruebas no certifican creación de
+reservas ni atomicidad. Ejecutar además lint, TypeScript y build.
+
+Revisión manual en navegador pendiente: abrir selección Individual y Friends
+desde KRE/URL, comprobar prellenado con sesión, errores al salir de campos vacíos,
+cambio Friends → Individual → Friends, revocación del checkbox al editar, botón
+final sin éxito falso, retorno desde login y navegación móvil/teclado.
