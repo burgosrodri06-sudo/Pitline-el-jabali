@@ -1,4 +1,12 @@
-# Reservas: contrato y límite del primer bloque
+# Reservas: historial de diseño y preparación del booking
+
+**Bloque 3:** el backend ya está implementado en migraciones, sin aplicar al
+Supabase compartido ni conectar el wizard. El contrato vigente, permisos, RPC,
+pruebas y pasos de aplicación están en [RESERVATION_ENGINE_BACKEND.md](RESERVATION_ENGINE_BACKEND.md).
+Las secciones del primer bloque que siguen son históricas: la autorización del
+bloque 3 permitió definir el catálogo mínimo al seguir sin existir DDL de Andrés.
+En particular, los nombres de snapshots y permisos finales son los del documento
+de backend y las migraciones, no los de la propuesta inicial.
 
 Estado: diseño revisable y tipos de dominio, sin migración ni RPC ejecutable.
 No se ha conectado el booking ni cambiado el Supabase compartido. Este documento

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs"
+    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs",
+    "test:reservations:concurrency": "node tests/reservations/concurrency.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -17,12 +18,14 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "pg": "^8.23.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

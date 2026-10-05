@@ -1,7 +1,6 @@
 /**
- * Contrato de dominio del bloque inicial de reservas, todavía sin persistencia.
+ * Contrato de dominio del motor de reservas (migraciones 20261006000000/000100).
  * No son tipos generados de Supabase ni validadores de entradas externas.
- * Las referencias a slot/package y el contrato RPC esperan el esquema de KRE.
  * Ver docs/RESERVATION_ENGINE.md antes de conectar estos tipos al backend.
  */
 export type ReservationStatus =
@@ -44,8 +43,7 @@ export type ReservationPreparation = Pick<
 >;
 
 /**
- * Campos propios de la vertical. No representa una reserva completa ni una fila
- * insertable: faltan las relaciones de catálogo, que no se deben inventar.
+ * Campos de presentación propios de la vertical; no es una fila insertable.
  * Los timestamps se serializarán en ISO 8601 desde timestamptz de PostgreSQL.
  */
 export type ReservationCore = Readonly<{
@@ -66,4 +64,19 @@ export type ReservationParticipantSnapshot = Readonly<{
   /** Posición entera desde 1 hasta spotsRequired. */
   position: number;
   fullName: string;
+}>;
+
+export type CreateReservationInput = ReservationIntentCore & Readonly<{
+  slotId: string;
+  packageId: string;
+}>;
+
+/** JSON mínimo devuelto por public.create_reservation; montos en centavos USD. */
+export type ReservationReceipt = Readonly<{
+  id: string;
+  status: ReservationStatus;
+  price_cents_snapshot: number;
+  spots_snapshot: number;
+  currency: "USD";
+  expires_at: string;
 }>;
