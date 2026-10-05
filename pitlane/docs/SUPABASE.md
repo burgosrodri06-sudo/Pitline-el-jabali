@@ -116,4 +116,22 @@ create policy "Personal y admins leen todas las reservas"
 
 ## Tablas actuales
 
+El schema base (`*_schema_base.sql`) está congelado: todas las tablas y nombres ya existen, con RLS activado. Solo trae lectura pública del calendario (eventos `open`, sus tandas y paquetes activos); **cada dueño agrega las políticas de sus tablas en una migración nueva en su rama**. Tipos TypeScript en `@/types/database`.
+
+| Tablas | Dueño |
+|---|---|
+| `profiles` | Carlos |
+| `events`, `slots`, `packages` | Andrés |
+| `reservations`, `reservation_participants`, `waitlist_entries` | Gabriel |
+| `payments` | Gabriel y Rodrigo |
+| `attendance`, `credits` | Rodrigo |
+| Reportes (`services/reports.service.ts`) | Rodrigo |
+| `notifications`, `audit_logs` | integración |
+
+**Cupos disponibles:** se leen **solo** de la vista `public.slot_availability` (`slot_id`, `available_spots`), que usa `public.slot_available_spots(slot_id)`. Nunca calcules cupos en el código. Fórmula: `capacity - track_reserved_spots - spots` de reservas en `payment_review` o `paid`, o en `pending_payment` con `expires_at > now()`.
+
+Los comprobantes de transferencia van al bucket privado de Storage `payment-receipts`.
+
+**Datos:** los 3 paquetes llegan con la migración `seed_packages` (también al remoto). `supabase/seed.sql` solo corre en local con `npx supabase db reset` y crea un evento de prueba; para tenerlo en el remoto, pega `docs/demo-data.sql` en el SQL Editor.
+
 - `public.profiles`: `id`, `full_name`, `phone`, `role` (ver roles arriba, default `pilot`), `created_at`. Se crea sola al registrarse (toma `full_name` y `phone` de los metadatos del signup). Cada usuario lee y edita su propio perfil; `staff`, `payments`, `kre_admin` y `system_admin` leen todos; solo `system_admin` edita perfiles de otros y cambia roles.
