@@ -16,7 +16,7 @@ create table public.slots (
   capacity integer not null check (capacity between 1 and 10),
   track_reserved_capacity integer not null default 0,
   status text not null default 'open' check (status in ('open', 'closed')),
-  -- Every allocation writes this row, including at REPEATABLE READ isolation.
+  -- Every allocation writes this internal row version; RPC requires READ COMMITTED.
   allocation_version bigint not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -45,7 +45,7 @@ begin
   return new;
 end;
 $$;
-revoke all on function public.reservation_touch_updated_at() from public, anon, authenticated;
+revoke all on function public.reservation_touch_updated_at() from public, anon, authenticated, service_role;
 create trigger events_updated before update on public.events for each row execute function public.reservation_touch_updated_at();
 create trigger slots_updated before update on public.slots for each row execute function public.reservation_touch_updated_at();
 create trigger packages_updated before update on public.packages for each row execute function public.reservation_touch_updated_at();
@@ -54,7 +54,11 @@ alter table public.events enable row level security;
 alter table public.slots enable row level security;
 alter table public.packages enable row level security;
 revoke all on public.events, public.slots, public.packages from public, anon, authenticated;
-grant select on public.events, public.slots, public.packages to anon, authenticated;
+grant select on public.events, public.packages to anon, authenticated;
+-- Do not expose allocation counters or allocation timestamps as a side channel.
+-- API readers must use this explicit projection rather than SELECT * on slots.
+grant select (id, event_id, starts_at, ends_at, capacity, track_reserved_capacity, status, created_at)
+  on public.slots to anon, authenticated;
 create policy events_published on public.events for select to anon, authenticated using (status = 'published');
 create policy slots_published on public.slots for select to anon, authenticated using (
   status = 'open' and exists(select 1 from public.events e where e.id = event_id and e.status = 'published')

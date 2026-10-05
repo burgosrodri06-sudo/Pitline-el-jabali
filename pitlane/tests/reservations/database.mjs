@@ -7,7 +7,7 @@ export async function bootstrap(db) {
     do $$ begin
       if not exists(select from pg_roles where rolname='anon') then create role anon nologin; end if;
       if not exists(select from pg_roles where rolname='authenticated') then create role authenticated nologin; end if;
-      if not exists(select from pg_roles where rolname='service_role') then create role service_role nologin; end if;
+      if not exists(select from pg_roles where rolname='service_role') then create role service_role nologin bypassrls; end if;
     end $$;
     create schema auth;
     create table auth.users(id uuid primary key, raw_user_meta_data jsonb default '{}');
@@ -15,6 +15,10 @@ export async function bootstrap(db) {
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     grant usage on schema auth, public to anon, authenticated, service_role;
     grant execute on function auth.uid() to anon, authenticated, service_role;
+    -- Match the API grants enabled in supabase/config.toml. Migrations must
+    -- explicitly revoke these instead of passing only on vanilla PostgreSQL.
+    alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+    alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
   `);
   const directory = new URL("../../supabase/migrations/", import.meta.url);
   for (const name of (await readdir(directory)).filter(name => name.endsWith(".sql")).sort()) {
@@ -30,7 +34,8 @@ export async function fixture(db, { capacity = 10, track = 0 } = {}) {
     values ($1,$2,now()+interval '2 days',now()+interval '2 days 10 minutes',$3,$4)`, [ids.slot, ids.event, capacity, track]);
   await db.query(`insert into public.packages(id,code,name,price_cents,spots_required,active) values
     ($1::uuid,$1::uuid::text,'Individual',1500,1,true),($2::uuid,$2::uuid::text,'Friends Combo',5000,5,true)`, [ids.individual, ids.friends]);
-  await db.exec("update public.reservation_settings set active_waiver_version='test-only-v1'");
+  // Explicit opt-in, confined to the ephemeral/test DB; never a product seed.
+  await db.exec("update public.reservation_settings set deployment_environment='development',waiver_mode='test',active_waiver_version='DEV-ONLY:automated-tests'");
   return ids;
 }
 
@@ -49,7 +54,7 @@ export async function asUser(db, user, action, role = "authenticated") {
   }
 }
 
-export function reserve(db, ids, { key = randomUUID(), packageId = ids.individual, names = ["Ana"], waiver = true, version = "test-only-v1" } = {}) {
+export function reserve(db, ids, { key = randomUUID(), packageId = ids.individual, names = ["Ana"], waiver = true, version = "DEV-ONLY:automated-tests" } = {}) {
   return db.query("select public.create_reservation($1,$2,$3::jsonb,$4,$5,$6) as reservation",
     [ids.slot, packageId, JSON.stringify(names.map(full_name => ({ full_name }))), key, waiver, version]);
 }

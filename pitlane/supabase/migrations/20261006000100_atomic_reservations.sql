@@ -1,12 +1,24 @@
 create table public.reservation_settings (
   id boolean primary key default true check (id),
   hold_minutes integer not null default 15 check (hold_minutes between 1 and 60),
-  -- NULL deliberately disables NEW reservations until the official waiver exists.
-  active_waiver_version text check (char_length(btrim(active_waiver_version)) between 1 and 120)
+  -- Database-owner configuration only. Both defaults fail closed for test waivers.
+  deployment_environment text not null default 'production'
+    check (deployment_environment in ('production', 'development', 'staging')),
+  waiver_mode text not null default 'official' check (waiver_mode in ('official', 'test')),
+  -- NULL disables NEW reservations. DEV-ONLY is a reserved test namespace, not legal content.
+  active_waiver_version text check (
+    active_waiver_version = btrim(active_waiver_version)
+    and char_length(active_waiver_version) between 1 and 120
+  ),
+  constraint waiver_environment_guard check (
+    (waiver_mode = 'official' and (active_waiver_version is null or upper(active_waiver_version) not like 'DEV-ONLY%'))
+    or (waiver_mode = 'test' and deployment_environment in ('development', 'staging')
+      and (active_waiver_version is null or active_waiver_version like 'DEV-ONLY%'))
+  )
 );
 insert into public.reservation_settings(id) values (true);
 alter table public.reservation_settings enable row level security;
-revoke all on public.reservation_settings from public, anon, authenticated;
+revoke all on public.reservation_settings from public, anon, authenticated, service_role;
 grant select on public.reservation_settings to authenticated;
 create policy settings_admin_read on public.reservation_settings for select to authenticated
   using (public.has_role(array['system_admin']));
@@ -92,7 +104,7 @@ create constraint trigger reservation_participants_complete after insert or upda
   deferrable initially deferred for each row execute function public.check_reservation_participants();
 create constraint trigger participants_complete after insert or update or delete on public.reservation_participants
   deferrable initially deferred for each row execute function public.check_reservation_participants();
-revoke all on function public.protect_reservation_snapshot(), public.check_reservation_participants() from public, anon, authenticated;
+revoke all on function public.protect_reservation_snapshot(), public.check_reservation_participants() from public, anon, authenticated, service_role;
 
 alter table public.reservations enable row level security;
 alter table public.reservation_participants enable row level security;
@@ -124,6 +136,7 @@ declare
   v_names jsonb;
   v_payload jsonb;
   v_now timestamptz;
+  v_expires_at timestamptz;
   v_consumed integer;
 begin
   if v_user is null then raise exception using errcode = '42501', message = 'authentication_required'; end if;
@@ -193,11 +206,18 @@ begin
       raise exception using errcode = 'P0001', message = 'insufficient_capacity';
     end if;
     update public.slots set allocation_version = allocation_version + 1 where id = p_slot_id;
+    -- Refresh after any processing/trigger delay. Use the SAME instant for the
+    -- comparison, created_at and hold calculation; never round to seconds.
+    v_now := clock_timestamp();
+    v_expires_at := least(v_now + make_interval(mins => v_settings.hold_minutes), v_slot.starts_at);
+    if v_expires_at <= v_now then
+      raise exception using errcode = '22023', message = 'slot_unavailable';
+    end if;
     insert into public.reservations(user_id, slot_id, package_id, package_name_snapshot,
       price_cents_snapshot, spots_snapshot, expires_at, idempotency_key, request_payload,
       waiver_version, waiver_accepted_at, created_at, updated_at)
     values(v_user, p_slot_id, p_package_id, v_package.name, v_package.price_cents, v_package.spots_required,
-      least(v_now + make_interval(mins => v_settings.hold_minutes), v_slot.starts_at),
+      v_expires_at,
       p_idempotency_key, v_payload, p_waiver_version, v_now, v_now, v_now)
     returning * into v_reservation;
     insert into public.reservation_participants(reservation_id, position, full_name)
@@ -209,7 +229,7 @@ begin
     'currency', v_reservation.currency, 'expires_at', v_reservation.expires_at);
 end;
 $$;
-revoke all on function public.create_reservation(uuid, uuid, jsonb, uuid, boolean, text) from public, anon, authenticated;
+revoke all on function public.create_reservation(uuid, uuid, jsonb, uuid, boolean, text) from public, anon, authenticated, service_role;
 grant execute on function public.create_reservation(uuid, uuid, jsonb, uuid, boolean, text) to authenticated;
 
 create function public.expire_reservations(p_batch_size integer default 500) returns integer
@@ -227,12 +247,15 @@ begin
   return v_count;
 end;
 $$;
-revoke all on function public.expire_reservations(integer) from public, anon, authenticated;
+revoke all on function public.expire_reservations(integer) from public, anon, authenticated, service_role;
 grant execute on function public.expire_reservations(integer) to service_role;
 
 -- Aggregate public availability without exposing owners or participant names.
+-- SECURITY INVOKER would either fail for anon or undercount other users' holds.
+-- Keep a fixed, argument-free aggregate. row_security=off fails rather than
+-- silently filtering reservations if a future owner loses its RLS bypass.
 create function public.get_slot_availability() returns table(slot_id uuid, available_spots integer)
-language sql stable security definer set search_path = '' as $$
+language sql stable security definer set search_path = '' set row_security = off as $$
   select s.id, greatest(0, s.capacity - s.track_reserved_capacity - coalesce((
     select sum(r.spots_snapshot)::integer from public.reservations r where r.slot_id = s.id and (
       (r.status = 'pending_payment' and r.expires_at > statement_timestamp())
@@ -242,5 +265,5 @@ language sql stable security definer set search_path = '' as $$
   from public.slots s join public.events e on e.id = s.event_id
   where e.status = 'published' and s.status = 'open' and s.starts_at > statement_timestamp();
 $$;
-revoke all on function public.get_slot_availability() from public, anon, authenticated;
+revoke all on function public.get_slot_availability() from public, anon, authenticated, service_role;
 grant execute on function public.get_slot_availability() to anon, authenticated;
