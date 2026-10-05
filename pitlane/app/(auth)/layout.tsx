@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { barlow, barlowCondensed } from "@/components/auth/fonts";
 
-// Layout compartido por login, registro, verificar-correo y recuperar.
+// Layout compartido por login, registro, verificar-correo y recuperar-contrasena.
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className={`${barlow.className} min-h-dvh bg-[#0A0A0A] text-[#F4F4F4]`}>

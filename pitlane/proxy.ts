@@ -1,10 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ["/perfil", "/dashboard", "/admin"];
+const PROTECTED_ROUTES = ["/perfil", "/mis-reservas", "/reservas", "/admin", "/staff", "/cobros"];
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Pasa la ruta actual a las páginas (la usa requireAuthenticatedUser para ?next=).
+  function next() {
+    const headers = new Headers(request.headers);
+    headers.set("x-pathname", request.nextUrl.pathname);
+    return NextResponse.next({ request: { headers } });
+  }
+
+  let response = next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,7 +25,7 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
+          response = next();
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -53,6 +60,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Todo excepto archivos estáticos e imágenes.
-    "/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

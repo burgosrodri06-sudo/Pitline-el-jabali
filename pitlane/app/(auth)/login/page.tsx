@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { getHomeForRole } from "@/lib/auth/home";
 import { createClient } from "@/lib/supabase/client";
+import type { UserRole } from "@/types";
 import { translateAuthError } from "../errors";
 
 // Solo acepta rutas internas ("/algo"), nunca "//otro-sitio.com" ni URLs completas.
 function getNextPath() {
   const next = new URLSearchParams(window.location.search).get("next");
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/reservar";
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
 }
 
 export default function LoginPage() {
@@ -28,13 +30,25 @@ export default function LoginPage() {
       return;
     }
 
-    const { error } = await createClient().auth.signInWithPassword({ email, password });
+    const supabase = createClient();
+    const { data: auth, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setError(translateAuthError(error));
       return;
     }
 
-    router.push(getNextPath());
+    // Sin ?next=, cada rol va a su pantalla de inicio.
+    let destination = getNextPath();
+    if (!destination) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", auth.user.id)
+        .single<{ role: UserRole }>();
+      destination = getHomeForRole(profile?.role ?? "pilot");
+    }
+
+    router.push(destination);
     router.refresh();
   }
 
@@ -49,7 +63,7 @@ export default function LoginPage() {
         {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
 
         <div className="text-right">
-          <Link href="/recuperar" className="text-sm text-[#A3A3A3] underline">
+          <Link href="/recuperar-contrasena" className="text-sm text-[#A3A3A3] underline">
             Olvidé mi contraseña
           </Link>
         </div>
