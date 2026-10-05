@@ -13,19 +13,24 @@ import {
   ChevronRight,
 } from "./Icons";
 import type { Catalog } from "@/domain/events/types";
-import {
-  bookingHref,
-  dateLabel,
-  INITIAL_MONTH,
-  timeLabel,
-} from "@/lib/catalog";
+import { bookingHref, dateLabel, timeLabel } from "@/lib/catalog";
 import { EventCard } from "./EventCard";
 import { SlotCard } from "./SlotCard";
 import { PackageCard } from "./PackageCard";
 export function KreExperience({ catalog }: { catalog: Catalog }) {
-  const [month, setMonth] = useState(INITIAL_MONTH);
+  const initialMonth =
+    catalog.events[0]?.date.slice(0, 7) ??
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/El_Salvador",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .format(new Date())
+      .slice(0, 7);
+  const [month, setMonth] = useState(initialMonth);
   const [date, setDate] = useState(
-    catalog.events[0]?.date ?? `${INITIAL_MONTH}-01`,
+    catalog.events[0]?.date ?? `${initialMonth}-01`,
   );
   const [slotId, setSlotId] = useState<string>();
   const [packageId, setPackageId] = useState<string>();
@@ -59,7 +64,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
         Saltar al contenido
       </a>
       <div className={cx("demo-banner")}>
-        PROTOTIPO · Fechas, cupos y tarifas de ejemplo. No se realizan reservas.
+        KARTING RENTAL EXPERIENCE · Fechas y cupos publicados por ACES.
       </div>
       <header className={cx("navbar wrap")}>
         <Link href="/karting/kartingrentalexperience" className={cx("brand")}>
@@ -330,7 +335,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
               <p>
                 Compara los paquetes antes de continuar.
                 <br />
-                *Precios y duración pendientes de validación.
+                Tarifas vigentes. Segunda vuelta requiere completar la primera.
               </p>
             </div>
             <div className={cx("packages-grid")}>
