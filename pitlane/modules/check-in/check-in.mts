@@ -1,10 +1,7 @@
-/** Contrato provisional: no representa todavía el modelo del módulo de reservas. */
-export type ReservationStatus =
-  | "confirmed"
-  | "pending"
-  | "in_review"
-  | "cancelled"
-  | "expired";
+import type { ReservationStatus } from "../../lib/operations/rules.js";
+export type { ReservationStatus } from "../../lib/operations/rules.js";
+
+/** Prototipo local de pruebas: no es una fila de Supabase ni un servicio real. */
 
 export type CheckInReservation = Readonly<{
   id: string;
@@ -37,7 +34,7 @@ export type CheckInResult =
     }>
   | Readonly<{
       outcome: "rejected";
-      reason: "unknown_code" | "reservation_not_confirmed" | "wrong_date" | "wrong_slot";
+      reason: "unknown_code" | "reservation_not_paid" | "wrong_date" | "wrong_slot";
     }>;
 
 /**
@@ -71,9 +68,10 @@ export function createLocalCheckIn(
     const reservation = byCode.get(request.code);
     if (!reservation) return { outcome: "rejected", reason: "unknown_code" };
 
-    // Regla provisional: solo "confirmed" habilita asistencia.
-    if (reservation.status !== "confirmed") {
-      return { outcome: "rejected", reason: "reservation_not_confirmed" };
+    // Repetir una reserva atendida solo puede devolver su marcación existente.
+    const previous = attendances.get(reservation.id);
+    if (reservation.status !== "paid" && !(reservation.status === "attended" && previous)) {
+      return { outcome: "rejected", reason: "reservation_not_paid" };
     }
     if (reservation.eventDate !== request.eventDate) {
       return { outcome: "rejected", reason: "wrong_date" };
@@ -82,7 +80,6 @@ export function createLocalCheckIn(
       return { outcome: "rejected", reason: "wrong_slot" };
     }
 
-    const previous = attendances.get(reservation.id);
     const attendance = previous ?? {
       reservationId: reservation.id,
       checkedInAt: clock().toISOString(),

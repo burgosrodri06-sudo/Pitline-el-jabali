@@ -4,7 +4,7 @@ import { createLocalCheckIn } from "./check-in.mts";
 import { createSimulatedReservations } from "./fixtures/simulated-reservations.mts";
 
 const request = {
-  code: "SIM-CONFIRMED",
+  code: "SIM-PAID",
   eventDate: "2026-09-25",
   slotId: "sim-slot-1800",
 };
@@ -19,14 +19,14 @@ function setup() {
   return { service, clockCalls: () => clockCalls };
 }
 
-test("registra una reserva confirmada y devuelve titular, cupos y hora", () => {
+test("registra una reserva pagada y devuelve titular, cupos y hora", () => {
   const { service, clockCalls } = setup();
   const before = service.listAttendance();
   assert.deepEqual(service.register(request), {
     outcome: "registered",
     attendance: { reservationId: "sim-reservation-1", checkedInAt: firstTime },
     holderName: "Piloto de prueba",
-    seats: 2,
+    seats: 5,
   });
   assert.equal(service.listAttendance().length, before.length + 1);
   assert.equal(clockCalls(), 1);
@@ -34,10 +34,12 @@ test("registra una reserva confirmada y devuelve titular, cupos y hora", () => {
 
 const rejectionCases = [
   ["código desconocido", { code: "SIM-UNKNOWN" }, "unknown_code"],
-  ["pendiente", { code: "SIM-PENDING" }, "reservation_not_confirmed"],
-  ["en revisión", { code: "SIM-IN_REVIEW" }, "reservation_not_confirmed"],
-  ["cancelada", { code: "SIM-CANCELLED" }, "reservation_not_confirmed"],
-  ["expirada", { code: "SIM-EXPIRED" }, "reservation_not_confirmed"],
+  ["pendiente", { code: "SIM-PENDING_PAYMENT" }, "reservation_not_paid"],
+  ["en revisión", { code: "SIM-PAYMENT_REVIEW" }, "reservation_not_paid"],
+  ["cancelada", { code: "SIM-CANCELLED" }, "reservation_not_paid"],
+  ["expirada", { code: "SIM-EXPIRED" }, "reservation_not_paid"],
+  ["ausente", { code: "SIM-NO_SHOW" }, "reservation_not_paid"],
+  ["atendida sin marcación previa", { code: "SIM-ATTENDED" }, "reservation_not_paid"],
   ["otra fecha con la misma tanda", { eventDate: "2026-09-26" }, "wrong_date"],
   ["otra tanda con la misma fecha", { slotId: "sim-slot-1810" }, "wrong_slot"],
 ];
