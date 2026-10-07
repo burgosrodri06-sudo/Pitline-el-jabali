@@ -7,15 +7,11 @@ import { AuthField, AuthTitle, PasswordField, primaryButton } from "@/components
 import { getHomeForRole } from "@/lib/auth/home";
 import { getProfile, resendVerification, signIn } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
-
-// Solo acepta rutas internas ("/algo"), nunca "//otro-sitio.com" ni URLs completas.
-function getNextPath() {
-  const next = new URLSearchParams(window.location.search).get("next");
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-}
+import { useNextPath, withNext } from "@/lib/auth/next-path";
 
 export default function LoginPage() {
   const router = useRouter();
+  const nextPath = useNextPath();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   // Correo de una cuenta sin verificar: muestra el botón "Reenviar correo".
@@ -49,14 +45,14 @@ export default function LoginPage() {
     }
 
     // Sin ?next=, cada rol va a su pantalla de inicio.
-    const destination = getNextPath() ?? getHomeForRole((await getProfile(user.id))?.role ?? "pilot");
+    const destination = nextPath ?? getHomeForRole((await getProfile(user.id))?.role ?? "pilot");
     router.push(destination);
     router.refresh();
   }
 
   async function handleResend() {
     setResend("sending");
-    const { error } = await resendVerification(unverifiedEmail);
+    const { error } = await resendVerification(unverifiedEmail, nextPath);
     if (error) {
       setError(translateAuthError(error));
       setResend("idle");
@@ -103,7 +99,7 @@ export default function LoginPage() {
 
       <p className="mt-8 text-center text-sm text-[#A3A3A3]">
         ¿No tienes cuenta?{" "}
-        <Link href="/registro" className="font-semibold text-[#F4F4F4] underline">
+        <Link href={withNext("/registro", nextPath)} className="font-semibold text-[#F4F4F4] underline">
           Crea una
         </Link>
       </p>

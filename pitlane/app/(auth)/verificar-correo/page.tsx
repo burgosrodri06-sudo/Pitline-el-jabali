@@ -5,6 +5,7 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
 import { resendVerification } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
+import { safeNextPath, withNext } from "@/lib/auth/next-path";
 
 // registro guarda el correo en sessionStorage antes de redirigir aquí.
 function readSignupEmail() {
@@ -15,6 +16,14 @@ function readSignupEmail() {
   }
 }
 
+function readSignupNext() {
+  try {
+    return safeNextPath(sessionStorage.getItem("pitlane:signup-next"));
+  } catch {
+    return null;
+  }
+}
+
 const noSubscribe = () => () => {};
 
 export default function VerificarCorreoPage() {
@@ -22,6 +31,7 @@ export default function VerificarCorreoPage() {
   const [error, setError] = useState("");
   // null en el servidor; "" = no hay correo guardado y se muestra el campo.
   const storedEmail = useSyncExternalStore(noSubscribe, readSignupEmail, () => null);
+  const nextPath = useSyncExternalStore(noSubscribe, readSignupNext, () => null);
 
   async function handleResend(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,7 +41,7 @@ export default function VerificarCorreoPage() {
       return;
     }
 
-    const { error } = await resendVerification(email);
+    const { error } = await resendVerification(email, nextPath);
 
     if (error) {
       setError(translateAuthError(error));
@@ -54,7 +64,7 @@ export default function VerificarCorreoPage() {
       </div>
 
       <div className="mt-6 space-y-3">
-        <Link href="/login" className={`${primaryButton} block text-center`}>
+        <Link href={withNext("/login", nextPath)} className={`${primaryButton} block text-center`}>
           Ya verifiqué mi correo
         </Link>
 

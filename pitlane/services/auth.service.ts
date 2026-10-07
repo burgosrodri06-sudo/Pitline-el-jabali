@@ -10,14 +10,18 @@ type SignUpData = { name: string; email: string; phone: string; password: string
 // Los enlaces de los correos vuelven a esta app.
 const origin = () => window.location.origin;
 
-export async function signUp({ name, email, phone, password }: SignUpData) {
+// Después de verificar el correo vuelve a /login, conservando ?next= si viene de una reserva.
+const loginUrl = (next?: string | null) =>
+  next ? `${origin()}/login?next=${encodeURIComponent(next)}` : `${origin()}/login`;
+
+export async function signUp({ name, email, phone, password }: SignUpData, next?: string | null) {
   // full_name y phone van a user metadata; el trigger los copia a public.profiles.
   const { error } = await createClient().auth.signUp({
     email,
     password,
     options: {
       data: { full_name: name, phone },
-      emailRedirectTo: `${origin()}/login`,
+      emailRedirectTo: loginUrl(next),
     },
   });
   // Si el correo ya existe, respondemos igual que con uno nuevo para no revelarlo.
@@ -57,11 +61,11 @@ export async function requestPasswordReset(email: string) {
   });
 }
 
-export async function resendVerification(email: string) {
+export async function resendVerification(email: string, next?: string | null) {
   return createClient().auth.resend({
     type: "signup",
     email,
-    options: { emailRedirectTo: `${origin()}/login` },
+    options: { emailRedirectTo: loginUrl(next) },
   });
 }
 

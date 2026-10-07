@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, PasswordField, primaryButton } from "@/components/auth/ui";
 import { signUp } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
+import { useNextPath, withNext } from "@/lib/auth/next-path";
 
 type Errors = Partial<Record<"name" | "email" | "phone" | "password" | "confirm" | "terms", string>>;
 
@@ -18,6 +19,7 @@ const PASSWORD_RULES = [
 
 export default function RegistroPage() {
   const router = useRouter();
+  const nextPath = useNextPath();
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState("");
   const [password, setPassword] = useState("");
@@ -46,16 +48,18 @@ export default function RegistroPage() {
     if (Object.keys(next).length > 0) return;
 
     setLoading(true);
-    const { error } = await signUp({ name, email, phone, password });
+    const { error } = await signUp({ name, email, phone, password }, nextPath);
     if (error) {
       setError(translateAuthError(error));
       setLoading(false);
       return;
     }
 
-    // Guardamos el correo para que verificar-correo pueda reenviarlo (no va en la URL).
+    // Guardamos el correo (y el next, si viene de una reserva) para verificar-correo (no van en la URL).
     try {
       sessionStorage.setItem("pitlane:signup-email", email);
+      if (nextPath) sessionStorage.setItem("pitlane:signup-next", nextPath);
+      else sessionStorage.removeItem("pitlane:signup-next");
     } catch {
       // Sin sessionStorage, verificar-correo le pide el correo al usuario.
     }
@@ -114,7 +118,7 @@ export default function RegistroPage() {
 
       <p className="mt-8 text-center text-sm text-[#A3A3A3]">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/login" className="font-semibold text-[#F4F4F4] underline">
+        <Link href={withNext("/login", nextPath)} className="font-semibold text-[#F4F4F4] underline">
           Inicia sesión
         </Link>
       </p>

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { barlow, barlowCondensed } from "@/components/auth/fonts";
+import UserMenu from "@/components/layout/UserMenu";
 
 // Layout compartido por login, registro, verificar-correo y recuperar-contrasena.
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -11,7 +12,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <Link href="/" className={`${barlowCondensed.className} text-2xl font-bold`}>
           PitLane
         </Link>
-        <span className="text-sm text-[#A3A3A3]">Autódromo El Jabalí</span>
+        <UserMenu />
       </header>
       <main className="mx-auto max-w-md px-5 pb-12">{children}</main>
     </div>
