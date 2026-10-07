@@ -226,8 +226,9 @@ begin
      then raise exception 'operations_idempotency_conflict'; end if;
    return r.id;
  end if;
- select e0.* into e from public.events e0 join public.slots s0 on s0.event_id=e0.id where s0.id=p_slot_id for share of e0;
+ -- Match the shared writer protocol: slot -> event -> package.
  select * into s from public.slots where id=p_slot_id for update;
+ select * into e from public.events where id=s.event_id for share;
  select * into p from public.packages where id=p_package_id for share;
  v_now:=clock_timestamp();
  if s.id is null or e.status<>'open' or s.status not in ('available','full') or s.starts_at<=v_now

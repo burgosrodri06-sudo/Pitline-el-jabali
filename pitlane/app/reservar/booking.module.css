@@ -1,7 +1,7 @@
 .page { min-height: 100vh; background: #0c0c0e; color: #f4f3ef; font-family: var(--font-geist-sans), Arial, sans-serif; color-scheme: dark; }
 .page button { cursor: pointer; transition: background-color 160ms, border-color 160ms; }
 .page button:disabled { cursor: not-allowed; }
-.page button:focus-visible, .page a:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+.page button:focus-visible, .page a:focus-visible, .page input:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
 .skipLink { position: fixed; top: -100px; left: 16px; z-index: 10; padding: 16px; background: #c8102e; }
 .skipLink:focus { top: 16px; }
 .header { min-height: 92px; max-width: 1280px; margin: auto; padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid #303034; }
@@ -68,8 +68,20 @@
 .review { border: 1px solid #3b3b41; padding: 24px; background: #161618; }
 .review h3 { font-size: 28px; font-weight: 800; margin-bottom: 16px; }
 .review .summaryRow { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
-.paymentNotice { margin-top: 24px; padding: 22px; border-left: 3px solid #c8102e; background: #211317; font-size: 14px; }
-.paymentNotice p { color: #c5c5cb; margin: 10px 0; font-size: 13px; line-height: 1.8; }
+.preparationNotice { margin-top: 24px; padding: 22px; border-left: 3px solid #c8102e; background: #211317; font-size: 14px; }
+.preparationNotice p { color: #c5c5cb; margin: 10px 0; font-size: 13px; line-height: 1.8; }
+.participants, .waiver { min-width: 0; margin-top: 28px; padding: 20px; border: 1px solid #3b3b41; }
+.participants legend, .waiver legend { padding: 0 6px; font-size: 17px; font-weight: 750; }
+.participants .footnote { margin-top: 0; }
+.participantField { margin-top: 18px; }
+.participantField label { display: block; margin-bottom: 8px; font-size: 13px; }
+.participantField input { display: block; width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #56565e; border-radius: 2px; background: #161618; color: #f4f3ef; font-size: 16px; }
+.participantField input[aria-invalid="true"] { border-color: #ff6b82; }
+.fieldError { margin-top: 8px; color: #ff9bad; font-size: 12px; }
+.rules { padding-left: 20px; list-style: disc; color: #bcbcc3; font-size: 13px; line-height: 1.8; }
+.rules li + li { margin-top: 8px; }
+.waiverLabel { display: flex; gap: 12px; align-items: flex-start; margin-top: 20px; padding: 8px 0; font-size: 13px; line-height: 1.7; cursor: pointer; }
+.waiverLabel input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: #c8102e; }
 .footer { max-width: 1200px; margin: 20px auto 0; padding: 24px 20px; border-top: 1px solid #303034; display: flex; justify-content: space-between; gap: 20px; color: #9999a3; font-size: 9px; letter-spacing: 1px; }
 @media (max-width: 900px) { .bookingLayout { gap: 28px; grid-template-columns: minmax(0, 1fr) 280px; } .hero { align-items: flex-start; flex-direction: column; } }
 @media (max-width: 700px) { .header { padding: 20px; } .venue { font-size: 10px; } .venue span { max-width: 150px; line-height: 1.5; } .bookingLayout { grid-template-columns: 1fr; } .summary { position: static; } .steps button { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 11px; } .choice { padding: 16px; } .mockNotice { align-items: flex-start; flex-direction: column; gap: 4px; } .packageTop h3 { font-size: 21px; } .packageTop strong { font-size: 24px; } .actions { gap: 12px; } .primaryButton { padding: 14px 16px; gap: 16px; } .footer { flex-direction: column; gap: 8px; } }

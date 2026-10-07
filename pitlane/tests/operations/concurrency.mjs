@@ -164,7 +164,7 @@ try {
       [f.event],
     )
   ).rows[0].id;
-  const web = await connect();
+  const web = await connect("pilot");
   const [, webBlocked] = await race(
     admin,
     a,
@@ -178,16 +178,16 @@ try {
       ]),
     () =>
       web.query(
-        `insert into reservations(user_id,slot_id,package_id,spots,amount,status,rules_accepted_at,expires_at) values($1,$2,$3,1,15,'pending_payment',now(),now()+interval '5 minutes')`,
-        [users.pilot, next, f.pkg],
+        `select create_reservation($1,$2,$3::jsonb,$4,true)`,
+        [next, f.pkg, JSON.stringify([{ full_name: "Web" }]), randomUUID()],
       ),
   );
   assert.match(
     webBlocked.error?.message ?? "",
-    /operations_insufficient_capacity/,
+    /insufficient_capacity/,
   );
   console.log(
-    "PASS: web allocation and track sale share the same capacity lock.",
+    "PASS: Gabriel's create_reservation and track sale share the same capacity lock.",
   );
   const ca = await connect("kre_admin");
   const cb = await connect("kre_admin");

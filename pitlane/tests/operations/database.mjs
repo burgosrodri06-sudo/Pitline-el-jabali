@@ -12,7 +12,7 @@ export async function initializeDatabase(db) {
   await db.exec(`
     create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create schema storage;
-    create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');
+    create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}',email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
     create table storage.buckets(id text primary key,name text,public boolean);
@@ -41,7 +41,7 @@ export const users = {
 export async function seed(db) {
   for (const [role, id] of Object.entries(users)) {
     await db.query(
-      `insert into auth.users(id,raw_user_meta_data) values($1,jsonb_build_object('full_name',$2::text))`,
+      `insert into auth.users(id,raw_user_meta_data,email_confirmed_at) values($1,jsonb_build_object('full_name',$2::text),now())`,
       [id, role],
     );
     await db.query(`update public.profiles set role=$1 where id=$2`, [

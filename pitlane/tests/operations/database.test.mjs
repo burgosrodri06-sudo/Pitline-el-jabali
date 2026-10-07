@@ -9,6 +9,34 @@ after(async () => {
   await db?.close();
 });
 
+test("motor web integrado: reserva real de Gabriel llega a aprobación y check-in de Rodrigo", async () =>
+  scenario(async (f) => {
+    const reservation = (await asUser(db, "pilot", () => db.query(
+      `select create_reservation($1,$2,$3::jsonb,gen_random_uuid(),true) as r`,
+      [f.slot, f.pkg, JSON.stringify([{ full_name: "Piloto Web" }])],
+    ))).rows[0].r;
+    assert.equal(reservation.status, "pending_payment");
+    // The upload/payment submission module is outside this PR. Seed only that
+    // handoff; reservation and participants above come from the real web RPC.
+    await db.query("update reservations set status='payment_review' where id=$1", [reservation.id]);
+    const payment = (await db.query(
+      `insert into payments(reservation_id,amount,method,reference,last4,receipt_path,status)
+       values($1,$2,'bank_transfer','WEB-1','1234','test/web.png','uploaded') returning id`,
+      [reservation.id, reservation.amount],
+    )).rows[0].id;
+    await db.exec("insert into storage.objects(bucket_id,name) values('payment-receipts','test/web.png')");
+    await asUser(db, "payments", () => db.query("select operations_review_payment($1,'approve')", [payment]));
+    const token = (await db.query("select qr_token from reservations where id=$1", [reservation.id])).rows[0].qr_token;
+    const checked = await asUser(db, "staff", () => db.query("select operations_check_in($1,$2)", [f.slot, "pitlane:qr:" + token]));
+    assert.equal(checked.rows[0].operations_check_in, 1);
+    const participant = (await db.query(
+      `select p.full_name, a.checked_in_at from reservation_participants p
+       join attendance a on a.participant_id=p.id where p.reservation_id=$1`, [reservation.id],
+    )).rows[0];
+    assert.equal(participant.full_name, "Piloto Web");
+    assert.ok(participant.checked_in_at);
+  }));
+
 test("Friends permite asistencia parcial y no hereda la vuelta completada de otro participante", async () => scenario(async f => {
   const pkg = (await db.query("select id from packages where name='Friends Combo'")).rows[0].id;
   const r = (await db.query(`insert into reservations(slot_id,package_id,spots,amount,status,channel) values($1,$2,5,50,'paid','track') returning id,code`, [f.slot,pkg])).rows[0];

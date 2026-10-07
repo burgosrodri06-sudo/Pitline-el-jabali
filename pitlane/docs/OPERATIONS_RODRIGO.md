@@ -1,6 +1,6 @@
 # Operación — Rodrigo Burgos
 
-Rama `feature/operations`, basada en el esquema congelado de `main` (`9bcf6a6`).
+Rama `feature/operations`, actualizada con `main` (`c6c5047`, PR #13 de Gabriel).
 Implementación de P-05, P-07, P-08, P-11 y P-12. La migración se entrega por PR;
 no se ha aplicado al Supabase compartido ni se ha mergeado a main.
 
@@ -44,10 +44,12 @@ ni el checkout de otros integrantes.
 
 ## Migración y capacidad
 
-`20261005190815_rodrigo_operations.sql` se creó con
+`20261007182818_rodrigo_operations.sql` se creó con
 `npx supabase migration new rodrigo_operations`. Agrega cierre operativo, autor
 de créditos/finalización, idempotencia y restricciones de asistencia/pagos.
-No recrea tablas del catálogo ni de reservas.
+No recrea tablas del catálogo ni de reservas. Sustituye el archivo de esta rama
+`20261005190815_rodrigo_operations.sql`, todavía no mergeado ni aplicado por esta
+entrega, para ordenar la migración después de la extensión web ya integrada.
 
 RPC: `operations_review_payment`, `operations_check_in`,
 `operations_complete_ride`, `operations_close_slot`, `operations_track_sale`,
@@ -65,7 +67,9 @@ Consumen: `payment_review`, `paid`, `attended`, `no_show` y `pending_payment`
 vigente. Las retenciones vencidas no consumen. Un trigger bloquea la tanda y
 comprueba capacidad en toda asignación. Exige READ COMMITTED. Las RPC de operación
 bloquean tanda antes de reserva y pago/asistencia. Gabriel debe respetar ese orden
-y la fórmula compartida en su motor; nunca calcular capacidad en React.
+y la fórmula compartida en su motor; nunca calcular capacidad en React. El motor
+integrado `create_reservation` consulta esa función y bloquea la tanda; venta en
+pista usa el mismo orden tanda → evento → paquete.
 
 ## Créditos y reportes
 
@@ -103,6 +107,10 @@ npm run test:operations:visual
   única, último cupo entre ventas simultáneas, web contra pista y créditos
   simultáneos. Instancia temporal local; no usa credenciales/URL de Supabase ni
   cambia usuarios del sistema. Conserva carpeta temporal para diagnóstico.
+- Integración con Gabriel: las 67 pruebas combinadas cargan todas las migraciones.
+  Una reserva creada por `create_reservation` llega a aprobación y check-in de
+  Rodrigo; solo la entrega del comprobante se prepara como fixture. La carrera
+  web/pista usa ambas RPC reales, con espera de bloqueo comprobada.
 - Cinco páginas a 360 y 1440 px en Edge headless, sin desbordamiento horizontal.
   `visual-fixtures.mjs` reemplaza servicios SOLO en ese proceso de pruebas; la app
   nunca lo importa. Capturas: `.next/operations-visual/`. Requiere Edge instalado.
@@ -115,13 +123,15 @@ permisos deben verificarse en el teléfono de pista. Escáner:
 
 ## Integración y despliegue pendientes
 
-1. Orden de merge: Andrés → Gabriel → Rodrigo. Actualizar esta rama y repetir
-   pruebas contra las migraciones integradas antes del merge final.
-2. **Conflicto:** `origin/feature/reservation-engine` en `dd9ef67` crea otra vez
-   `events/slots/packages/reservations` con columnas/estados distintos del schema
-   oficial (`event_date/published`, `price_cents`, `spots_snapshot`, etc.). No se
-   mezcló esa rama. Gabriel debe alinearla antes de mergear; no aplicar ambas
-   definiciones de tablas.
+1. Orden acordado: Andrés → Gabriel → Rodrigo. Gabriel ya está en main por PR #13;
+   la entrega de Andrés y la revisión cruzada siguen pendientes de confirmar antes
+   del merge de Rodrigo. No se fusionan ramas de otros integrantes desde este PR.
+2. **Integración local resuelta (7 de octubre):** Gabriel alineó su esquema en
+   `abd6142`; esta rama incorpora `main` en `c6c5047`. Se resolvieron los conflictos
+   de dependencias/scripts conservando ambas suites. Los fixtures de Auth/Storage
+   cubren ambas migraciones y la prueba de capacidad conserva cupos `attended` y
+   `no_show`. Pasan 67 pruebas, lint, build con TypeScript y los 5 escenarios de
+   concurrencia local.
 3. Aplicar la migración mediante el mecanismo de PR/merge del equipo y revisar
    tablas/políticas en Supabase. No crear tablas a mano en el dashboard.
 4. Probar con cuentas reales piloto/payments/staff/admin y comprobante de prueba,
