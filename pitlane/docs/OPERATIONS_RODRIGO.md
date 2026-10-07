@@ -123,6 +123,11 @@ permisos deben verificarse en el teléfono de pista. Escáner:
 
 ## Integración y despliegue pendientes
 
+Resultados remotos, revisión de Rodrigo a Gabriel y recorrido de aceptación:
+[RODRIGO_VALIDACION_REAL.md](./RODRIGO_VALIDACION_REAL.md). El 7 de octubre la
+consulta remota confirmó que faltan `operation_slot_closures` e
+`idempotency_key`; el acceso de la CLI todavía requiere `supabase login`.
+
 1. Orden acordado: Andrés → Gabriel → Rodrigo. Gabriel ya está en main por PR #13;
    la entrega de Andrés y la revisión cruzada siguen pendientes de confirmar antes
    del merge de Rodrigo. No se fusionan ramas de otros integrantes desde este PR.
