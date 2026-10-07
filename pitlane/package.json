@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs tests/reservations/submission.test.mjs",
+    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs tests/reservations/submission.test.mjs tests/reservations/receipts.test.mjs",
     "test:reservations:concurrency": "node tests/reservations/concurrency.mjs"
   },
   "dependencies": {
@@ -15,7 +15,8 @@
     "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
