@@ -10,7 +10,10 @@ export async function bootstrap(db) {
       if not exists(select from pg_roles where rolname='service_role') then create role service_role nologin bypassrls; end if;
     end $$;
     create schema auth;
-    create table auth.users(id uuid primary key, raw_user_meta_data jsonb default '{}');
+    -- Storage prerequisite only: schema_base runs unchanged.
+    create schema storage;
+    create table storage.buckets(id text primary key, name text, public boolean);
+    create table auth.users(id uuid primary key, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     grant usage on schema auth, public to anon, authenticated, service_role;
@@ -28,14 +31,12 @@ export async function bootstrap(db) {
 
 export async function fixture(db, { capacity = 10, track = 0 } = {}) {
   const ids = Object.fromEntries(["user", "other", "event", "slot", "individual", "friends"].map(key => [key, randomUUID()]));
-  await db.query("insert into auth.users(id) values ($1), ($2)", [ids.user, ids.other]);
-  await db.query("insert into public.events(id,title,event_date,status) values ($1,'Test',(now() at time zone 'America/El_Salvador')::date + 2,'published')", [ids.event]);
-  await db.query(`insert into public.slots(id,event_id,starts_at,ends_at,capacity,track_reserved_capacity)
+  await db.query("insert into auth.users(id,email_confirmed_at) values ($1,now()), ($2,now())", [ids.user, ids.other]);
+  await db.query("insert into public.events(id,date,status,start_time,end_time) values ($1,(now() at time zone 'America/El_Salvador')::date + 2,'open','00:00','23:59')", [ids.event]);
+  await db.query(`insert into public.slots(id,event_id,starts_at,ends_at,capacity,track_reserved_spots)
     values ($1,$2,now()+interval '2 days',now()+interval '2 days 10 minutes',$3,$4)`, [ids.slot, ids.event, capacity, track]);
-  await db.query(`insert into public.packages(id,code,name,price_cents,spots_required,active) values
-    ($1::uuid,$1::uuid::text,'Individual',1500,1,true),($2::uuid,$2::uuid::text,'Friends Combo',5000,5,true)`, [ids.individual, ids.friends]);
-  // Explicit opt-in, confined to the ephemeral/test DB; never a product seed.
-  await db.exec("update public.reservation_settings set deployment_environment='development',waiver_mode='test',active_waiver_version='DEV-ONLY:automated-tests'");
+  await db.query(`insert into public.packages(id,name,price,spots) values
+    ($1,'Individual',15,1),($2,'Friends Combo',50,5)`, [ids.individual, ids.friends]);
   return ids;
 }
 
@@ -54,7 +55,7 @@ export async function asUser(db, user, action, role = "authenticated") {
   }
 }
 
-export function reserve(db, ids, { key = randomUUID(), packageId = ids.individual, names = ["Ana"], waiver = true, version = "DEV-ONLY:automated-tests" } = {}) {
-  return db.query("select public.create_reservation($1,$2,$3::jsonb,$4,$5,$6) as reservation",
-    [ids.slot, packageId, JSON.stringify(names.map(full_name => ({ full_name }))), key, waiver, version]);
+export function reserve(db, ids, { key = randomUUID(), packageId = ids.individual, names = ["Ana"], rules = true } = {}) {
+  return db.query("select public.create_reservation($1,$2,$3::jsonb,$4,$5) as reservation",
+    [ids.slot, packageId, JSON.stringify(names.map(full_name => ({ full_name }))), key, rules]);
 }

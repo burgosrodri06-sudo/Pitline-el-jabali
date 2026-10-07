@@ -50,8 +50,10 @@ try {
     const result = await competing;
     if (sameKey) assert.deepEqual(result.value.rows, original.rows);
     else assert.match(result.error?.message ?? "", /insufficient_capacity/);
-    const row = (await setup.query("select count(*)::int as n,sum(spots_snapshot)::int as spots from public.reservations where slot_id=$1", [ids.slot])).rows[0];
-    assert.deepEqual(row, { n: 1, spots: combo ? 5 : 1 });
+    const rows = (await setup.query("select spots from public.reservations where slot_id=$1", [ids.slot])).rows;
+    assert.deepEqual(rows, [{ spots: combo ? 5 : 1 }]);
+    const available = (await setup.query("select public.slot_available_spots($1) as n", [ids.slot])).rows[0].n;
+    assert.equal(available, capacity - (combo ? 5 : 1));
   }
   await race({ capacity: 1 });
   await race({ capacity: 9, combo: true });
