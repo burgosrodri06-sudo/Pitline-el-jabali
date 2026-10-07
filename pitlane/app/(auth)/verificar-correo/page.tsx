@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
-import { createClient } from "@/lib/supabase/client";
+import { resendVerification } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 
 // registro guarda el correo en sessionStorage antes de redirigir aquí.
@@ -31,11 +31,7 @@ export default function VerificarCorreoPage() {
       return;
     }
 
-    const { error } = await createClient().auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/login` },
-    });
+    const { error } = await resendVerification(email);
 
     if (error) {
       setError(translateAuthError(error));

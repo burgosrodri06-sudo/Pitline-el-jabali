@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
-import { createClient } from "@/lib/supabase/client";
+import { requestPasswordReset } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 
 export default function RecuperarPage() {
@@ -19,9 +19,7 @@ export default function RecuperarPage() {
       return;
     }
 
-    const { error } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/nueva-contrasena`,
-    });
+    const { error } = await requestPasswordReset(email);
     if (error) {
       setError(translateAuthError(error));
       return;
