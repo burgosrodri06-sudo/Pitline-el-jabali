@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
 import { createClient } from "@/lib/supabase/client";
+import { signOut } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 
 type Props = {
@@ -50,7 +51,7 @@ export default function PerfilForm({ userId, name: initialName, email, phone: in
   }
 
   async function handleLogout() {
-    await createClient().auth.signOut();
+    await signOut();
     router.push("/login");
     router.refresh();
   }

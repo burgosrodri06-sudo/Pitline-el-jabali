@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
+import { AuthField, AuthTitle, PasswordField, primaryButton } from "@/components/auth/ui";
 import { getHomeForRole } from "@/lib/auth/home";
-import { createClient } from "@/lib/supabase/client";
-import type { UserRole } from "@/types";
+import { getProfile, resendVerification, signIn } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 
 // Solo acepta rutas internas ("/algo"), nunca "//otro-sitio.com" ni URLs completas.
@@ -18,6 +17,10 @@ function getNextPath() {
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  // Correo de una cuenta sin verificar: muestra el botón "Reenviar correo".
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resend, setResend] = useState<"idle" | "sending" | "sent">("idle");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,31 +28,42 @@ export default function LoginPage() {
     const email = String(data.get("email") ?? "").trim();
     const password = String(data.get("password") ?? "");
 
+    setUnverifiedEmail("");
+    setResend("idle");
     if (!email || !password) {
       setError("Ingresa tu correo y tu contraseña.");
       return;
     }
 
-    const supabase = createClient();
-    const { data: auth, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(translateAuthError(error));
+    setLoading(true);
+    const { user, error } = await signIn(email, password);
+    if (error || !user) {
+      if (error?.code === "email_not_confirmed") {
+        setUnverifiedEmail(email);
+        setError("");
+      } else {
+        setError(error ? translateAuthError(error) : "Algo salió mal. Inténtalo de nuevo.");
+      }
+      setLoading(false);
       return;
     }
 
     // Sin ?next=, cada rol va a su pantalla de inicio.
-    let destination = getNextPath();
-    if (!destination) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", auth.user.id)
-        .single<{ role: UserRole }>();
-      destination = getHomeForRole(profile?.role ?? "pilot");
-    }
-
+    const destination = getNextPath() ?? getHomeForRole((await getProfile(user.id))?.role ?? "pilot");
     router.push(destination);
     router.refresh();
+  }
+
+  async function handleResend() {
+    setResend("sending");
+    const { error } = await resendVerification(unverifiedEmail);
+    if (error) {
+      setError(translateAuthError(error));
+      setResend("idle");
+      return;
+    }
+    setError("");
+    setResend("sent");
   }
 
   return (
@@ -58,7 +72,21 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <AuthField label="Correo" name="email" type="email" autoComplete="email" />
-        <AuthField label="Contraseña" name="password" type="password" autoComplete="current-password" />
+        <PasswordField label="Contraseña" name="password" autoComplete="current-password" />
+
+        {unverifiedEmail && (
+          <div role="alert" className="rounded-md border border-[#2A2A2A] bg-[#1A1A1A] p-4 text-sm">
+            <p>Primero verifica tu correo con el enlace que te enviamos a {unverifiedEmail}.</p>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resend !== "idle"}
+              className="mt-3 w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold disabled:text-[#A3A3A3]"
+            >
+              {resend === "sending" ? "Enviando..." : resend === "sent" ? "Correo reenviado" : "Reenviar correo"}
+            </button>
+          </div>
+        )}
 
         {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
 
@@ -68,8 +96,8 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button type="submit" className={primaryButton}>
-          Iniciar sesión
+        <button type="submit" disabled={loading} className={primaryButton}>
+          {loading ? "Ingresando..." : "Iniciar sesión"}
         </button>
       </form>
 

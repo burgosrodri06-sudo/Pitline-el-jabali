@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
-import { createClient } from "@/lib/supabase/client";
+import { updatePassword } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 
 // Pantalla a la que llega el usuario desde el enlace de "Olvidé mi contraseña".
@@ -26,7 +26,7 @@ export default function NuevaContrasenaPage() {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    const { error } = await createClient().auth.updateUser({ password });
+    const { error } = await updatePassword(password);
     if (error) {
       setError(translateAuthError(error));
       return;
