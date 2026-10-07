@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 // Only for disposable test databases. Auth identity emulates Supabase's JWT GUC.
-export async function bootstrap(db) {
+export async function bootstrap(db, beforeReceipts = '') {
   await db.exec(`
     do $$ begin
       if not exists(select from pg_roles where rolname='anon') then create role anon nologin; end if;
@@ -13,6 +13,10 @@ export async function bootstrap(db) {
     -- Storage prerequisite only: schema_base runs unchanged.
     create schema storage;
     create table storage.buckets(id text primary key, name text, public boolean);
+    create table storage.objects(id uuid primary key default gen_random_uuid(), bucket_id text, name text, metadata jsonb, unique(bucket_id,name));
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to anon,authenticated,service_role;
+    grant all on storage.objects to anon,authenticated,service_role;
     create table auth.users(id uuid primary key, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
@@ -25,6 +29,7 @@ export async function bootstrap(db) {
   `);
   const directory = new URL("../../supabase/migrations/", import.meta.url);
   for (const name of (await readdir(directory)).filter(name => name.endsWith(".sql")).sort()) {
+    if (name.startsWith('20261008000000') && beforeReceipts) await db.exec(beforeReceipts);
     await db.exec(await readFile(new URL(name, directory), "utf8"));
   }
 }

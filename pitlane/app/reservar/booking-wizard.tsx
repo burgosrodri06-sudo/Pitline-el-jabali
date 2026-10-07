@@ -202,7 +202,8 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
             {receipt && <div ref={noticeRef} tabIndex={-1} role="status" className={styles.preparationNotice}>
               <strong>{receipt.status === 'pending_payment' ? 'Apartado pendiente de pago' : 'Estado de tu reserva'}</strong>
               <dl><SummaryRow label="Código">{receipt.code}</SummaryRow><SummaryRow label="Monto real USD">{formatPrice(receipt.amount)}</SummaryRow><SummaryRow label="Estado del backend">{receipt.status}</SummaryRow><SummaryRow label="Vencimiento">{new Intl.DateTimeFormat('es-SV', { timeZone: 'America/El_Salvador', dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(receipt.expiresAt!))}</SummaryRow></dl>
-              {receipt.status === 'pending_payment' && <p>{now !== null && Date.parse(receipt.expiresAt!) <= now ? 'El plazo del apartado venció. No lo considerés confirmado.' : 'Todavía no está pagado ni confirmado. La carga del comprobante estará disponible en el siguiente bloque.'}</p>}
+              {receipt.status === 'pending_payment' && <Link href={'/reservas/' + receipt.id + '/pago'}>Enviar comprobante para revisión</Link>}
+              {receipt.status === 'pending_payment' && <p>{now !== null && Date.parse(receipt.expiresAt!) <= now ? 'El plazo del apartado venció. No lo considerés confirmado.' : 'Todavía no está pagado ni confirmado. Podés enviar el comprobante para revisión en el entorno de pruebas.'}</p>}
             </div>}
           </section>
 
