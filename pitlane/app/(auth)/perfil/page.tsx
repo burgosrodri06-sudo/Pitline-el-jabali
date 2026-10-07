@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import PerfilForm from "./perfil-form";
+
+export const metadata: Metadata = { title: "Mi perfil | PitLane" };
 
 // Carga los datos reales en el servidor y se los pasa al formulario.
 export default async function PerfilPage() {

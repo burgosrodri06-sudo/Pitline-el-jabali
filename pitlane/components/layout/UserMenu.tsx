@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { getHomeForRole } from "@/lib/auth/home";
+import { safeNextPath, withNext } from "@/lib/auth/next-path";
 import { getCurrentUser, getProfile, onAuthChange, signOut } from "@/services/auth.service";
 import type { UserRole } from "@/types";
 
@@ -40,17 +41,9 @@ export default function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-4">
-        <Link href="/login" className={linkClass}>
-          Iniciar sesión
-        </Link>
-        <Link
-          href="/registro"
-          className="rounded-md bg-[#C8102E] px-3 py-2 text-sm font-semibold text-white hover:bg-[#A50D26]"
-        >
-          Crear cuenta
-        </Link>
-      </div>
+      <Suspense fallback={null}>
+        <GuestLinks linkClass={linkClass} />
+      </Suspense>
     );
   }
 
@@ -68,6 +61,25 @@ export default function UserMenu() {
       <button type="button" onClick={handleSignOut} className={linkClass}>
         Cerrar sesión
       </button>
+    </div>
+  );
+}
+
+// Enlaces sin sesión. Conservan el ?next= de la página actual (p. ej. al pasar de registro a login).
+// useSearchParams (y no window.location) para que se actualice al navegar sin recargar el layout.
+function GuestLinks({ linkClass }: { linkClass: string }) {
+  const nextPath = safeNextPath(useSearchParams().get("next"));
+  return (
+    <div className="flex items-center gap-4">
+      <Link href={withNext("/login", nextPath)} className={linkClass}>
+        Iniciar sesión
+      </Link>
+      <Link
+        href={withNext("/registro", nextPath)}
+        className="rounded-md bg-[#C8102E] px-3 py-2 text-sm font-semibold text-white hover:bg-[#A50D26]"
+      >
+        Crear cuenta
+      </Link>
     </div>
   );
 }
