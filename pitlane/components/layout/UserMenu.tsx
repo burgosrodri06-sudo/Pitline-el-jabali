@@ -37,7 +37,7 @@ export default function UserMenu() {
 
   if (user === undefined) return null;
 
-  const linkClass = "text-sm font-medium text-[#F4F4F4] hover:text-[#C8102E]";
+  const linkClass = "whitespace-nowrap text-sm font-medium text-[#F4F4F4] hover:text-[#C8102E]";
 
   if (!user) {
     return (
@@ -48,8 +48,9 @@ export default function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-[#A3A3A3]">{user.name}</span>
+    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      {/* En móvil no cabe: solo se muestran los enlaces. Un correo largo se corta con "...". */}
+      <span className="hidden min-w-0 truncate text-sm text-[#A3A3A3] sm:block">{user.name}</span>
       <Link href="/perfil" className={linkClass}>
         Mi perfil
       </Link>
