@@ -1,5 +1,10 @@
 # Backend de reservas — contrato compartido, Bloque 3.2
 
+La integración posterior del Bloque 4 se documenta en
+[RESERVATION_WIZARD_INTEGRATION.md](RESERVATION_WIZARD_INTEGRATION.md).
+Las menciones a wizard desconectado describen el alcance histórico de 3.2;
+el nuevo envío web está implementado pero cerrado por defecto, solo para staging.
+
 ## Migraciones y autoridad
 
 Ejecutar en orden las migraciones oficiales de profiles/auth/roles, schema_base

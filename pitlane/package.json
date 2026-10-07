@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs",
+    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs tests/reservations/submission.test.mjs",
     "test:reservations:concurrency": "node tests/reservations/concurrency.mjs"
   },
   "dependencies": {

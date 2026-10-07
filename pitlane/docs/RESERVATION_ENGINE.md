@@ -1,4 +1,8 @@
-# Reservation engine — Bloque 3.2
+# Reservation engine — Bloques 3.2 y 4
+
+Estado actual: el wizard ya invoca el servicio mediante una Server Action,
+solo bajo habilitación explícita de staging. Ver
+[RESERVATION_WIZARD_INTEGRATION.md](RESERVATION_WIZARD_INTEGRATION.md).
 
 El schema compartido de main es la autoridad: `20261005155117_schema_base.sql`,
 `20261005155549_seed_packages.sql` y `types/database.ts`. No se modifican las
@@ -29,19 +33,21 @@ reservation_settings, versión de waiver ni clasificación de entornos en DB.
 
 ## Booking y servicios
 
-El wizard mantiene su diseño, participantes, aceptación temporal y catálogo
-visual provisional. Sigue desconectado de la RPC hasta Bloque 4, sin éxito falso
-ni localStorage como backend. Su aviso explica que el documento definitivo está
-pendiente y que la aceptación del borrador no se registra.
+El wizard mantiene su diseño, participantes y aceptación temporal. Lee catálogo
+real y disponibilidad oficial por servicios; no utiliza mocks como fallback.
+La creación está cerrada por defecto y solo se habilita explícitamente en staging.
+El documento definitivo sigue pendiente; la aceptación temporal se registra
+únicamente al crear un apartado de prueba, sin presentarse como deslinde oficial.
 
 `ReservationPreparation` describe el borrador UI (`waiverAccepted`).
 `CreateReservationInput` describe la entrada real (`rulesAccepted`). Los tipos de
 respuesta reutilizan `Reservation` de `@/types/database`; amount no son centavos.
 `lib/services/reservations.ts` concentra la llamada Supabase y los errores
-permitidos; sigue siendo server-only, sin nueva Server Action.
+permitidos; sigue siendo server-only y lo invoca app/reservar/actions.ts.
 
 Pagos, Storage, waitlist, second lap, check-in, créditos y reportes quedan fuera
-de este bloque. El documento legal definitivo y la conexión UI siguen pendientes.
+de este bloque. El documento legal definitivo y la validación remota en staging
+siguen pendientes.
 
 Contrato SQL, permisos, concurrencia y pruebas:
 [RESERVATION_ENGINE_BACKEND.md](RESERVATION_ENGINE_BACKEND.md).
