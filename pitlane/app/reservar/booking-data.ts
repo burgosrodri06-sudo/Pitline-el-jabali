@@ -10,6 +10,9 @@ export type Slot = {
   eventDateId: string;
   startMinutes: number;
   remainingKarts: number;
+  startsAt?: string;
+  endsAt?: string;
+  capacity?: number;
 };
 
 export type Package = {
@@ -18,6 +21,9 @@ export type Package = {
   price: number;
   karts: number;
   description: string;
+  validFrom?: string | null;
+  validTo?: string | null;
+  durationMinutes?: number;
 };
 
 export const SLOT_DURATION = 10;
@@ -61,6 +67,10 @@ export function formatTime(minutes: number) {
 }
 
 export function formatSlot(slot: Slot) {
+  if (slot.startsAt && slot.endsAt) {
+    const format = new Intl.DateTimeFormat('es-SV', { timeZone: 'America/El_Salvador', hour: 'numeric', minute: '2-digit' });
+    return `${format.format(new Date(slot.startsAt))} – ${format.format(new Date(slot.endsAt))}`;
+  }
   return `${formatTime(slot.startMinutes)} – ${formatTime(slot.startMinutes + SLOT_DURATION)}`;
 }
 
