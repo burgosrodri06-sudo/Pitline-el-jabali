@@ -160,7 +160,12 @@ test('missing upload, full capacity corruption and duplicate reference fail with
   const y = await setup(); y.ref = x.ref; await upload(y);
   await assert.rejects(call(y, true), /unique constraint/);
   assert.equal((await db.query('select status from reservations where id=$1', [y.r.id])).rows[0].status, 'pending_payment');
-  await db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [y.ids.slot]);
+  await assert.rejects(db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [y.ids.slot]), /reservados/);
+  // Corrupción intencional únicamente en la base desechable: comprobar defensa adicional del pago.
+  await db.exec('alter table public.slots disable trigger kre_guard_slot');
+  try {
+    await db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [y.ids.slot]);
+  } finally { await db.exec('alter table public.slots enable trigger kre_guard_slot'); }
   await assert.rejects(call(y, true), /capacity_unavailable/);
 });
 test('compatible with Rodrigo migration: review can approve our submission; owner isolation', async () => {

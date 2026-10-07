@@ -34,12 +34,16 @@ export async function bootstrap(db, beforeReceipts = '') {
   }
 }
 
-export async function fixture(db, { capacity = 10, track = 0 } = {}) {
+export async function fixture(db, { capacity = 10, track = 0, near = false } = {}) {
   const ids = Object.fromEntries(["user", "other", "event", "slot", "individual", "friends"].map(key => [key, randomUUID()]));
   await db.query("insert into auth.users(id,email_confirmed_at) values ($1,now()), ($2,now())", [ids.user, ids.other]);
-  await db.query("insert into public.events(id,date,status,start_time,end_time) values ($1,(now() at time zone 'America/El_Salvador')::date + 2,'open','00:00','23:59')", [ids.event]);
+  // Cada escenario usa una fecha distinta y el flujo real: borrador -> tanda -> publicar.
+  const { rows: [timing] } = await db.query(`select case when $1 then date_trunc('second',clock_timestamp())+interval '2 minutes'
+    else ((greatest(coalesce((select max(date) from public.events),current_date),current_date+1)+1)+time '12:00') at time zone 'America/El_Salvador' end as starts_at`, [near]);
+  await db.query("insert into public.events(id,date,status,start_time,end_time) values ($1,($2::timestamptz at time zone 'America/El_Salvador')::date,'draft',($2::timestamptz at time zone 'America/El_Salvador')::time,'00:00')", [ids.event, timing.starts_at]);
   await db.query(`insert into public.slots(id,event_id,starts_at,ends_at,capacity,track_reserved_spots)
-    values ($1,$2,now()+interval '2 days',now()+interval '2 days 10 minutes',$3,$4)`, [ids.slot, ids.event, capacity, track]);
+    values ($1,$2,$5::timestamptz,$5::timestamptz+interval '10 minutes',$3,$4)`, [ids.slot, ids.event, capacity, track, timing.starts_at]);
+  await db.query("update public.events set status='open' where id=$1", [ids.event]);
   await db.query(`insert into public.packages(id,name,price,spots) values
     ($1,'Individual',15,1),($2,'Friends Combo',50,5)`, [ids.individual, ids.friends]);
   return ids;

@@ -22,7 +22,7 @@ Los cupos se consultan exclusivamente desde `slot_availability` / `slot_availabl
 
 ## Integración con Gabriel
 
-`Seleccionar tanda` apunta a `/reservar/[slotId]`. `main` aún no contiene el motor P-04. Se dejó una página de detalle de solo lectura con datos reales, explícitamente sin confirmar reservas. Gabriel puede sustituirla e incorporar su motor. No se tocó `payments.service.ts`.
+`Seleccionar tanda` apunta a `/reservar/[slotId]`. Al integrar con `main` el 7 de octubre, esta ruta se conectó con el formulario de Gabriel en `/reservar`, conservando los IDs reales de evento, tanda y paquete. La validación de la selección, autenticación y habilitación de reservas sigue a cargo de ese formulario y su servicio. No se tocó `payments.service.ts`.
 
 ## Prueba de aceptación
 
@@ -40,4 +40,6 @@ La migración se aplicó el 5 de octubre de 2026 en `pitlane-dev` y quedó regis
 
 Prueba remota completada en SQL Editor con el rol `authenticated` y la identidad de Andrés: crear fecha, generar 36 tandas de 18:00 a medianoche con 2 cupos para pista, publicar, comprobar 8 cupos web por tanda y cancelar las 36 tandas. Todo el ensayo terminó con `ROLLBACK`; no dejó datos de prueba. Se comprobó también el acceso real a `/admin/eventos` desde su sesión del navegador.
 
-Pendiente externo: revisión cruzada de Carlos y el motor de reservas/checkout de Gabriel.
+Integración del 7 de octubre: compilación y lint correctos; 63 pruebas aprobadas. Los datos de prueba de reservas ahora respetan el flujo borrador → tanda → publicación y las validaciones del catálogo. Las pruebas de datos corruptos usan exclusivamente bases desechables.
+
+Pendiente externo: revisión cruzada de Carlos y prueba completa del flujo integrado con las variables y permisos de despliegue del equipo.
