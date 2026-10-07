@@ -1,25 +1,16 @@
--- Evento de prueba para pegar a mano en el SQL Editor de Supabase.
--- Es el mismo que supabase/seed.sql. Requiere que las migraciones ya estén aplicadas.
-
--- 1 evento abierto el próximo viernes, de 18:00 a 18:40 (hora de El Salvador),
--- con 4 tandas de 10 minutos. Si ya existe ese evento, no hace nada.
-with d as (
-  select (now() at time zone 'America/El_Salvador')::date
-    + ((5 - extract(isodow from (now() at time zone 'America/El_Salvador'))::int + 6) % 7) + 1
-    as friday
-),
-e as (
-  insert into public.events (date, status, start_time, end_time)
-  select d.friday, 'open'::public.event_status, '18:00'::time, '18:40'::time
-  from d
-  where not exists (
-    select 1 from public.events x where x.date = d.friday and x.start_time = '18:00'
-  )
-  returning id, date, start_time, slot_minutes
-)
-insert into public.slots (event_id, starts_at, ends_at)
-select
-  e.id,
-  ((e.date + e.start_time) at time zone 'America/El_Salvador') + make_interval(mins => e.slot_minutes * n),
-  ((e.date + e.start_time) at time zone 'America/El_Salvador') + make_interval(mins => e.slot_minutes * (n + 1))
-from e, generate_series(0, 3) as n;
+-- Demo local o manual. Compatible con las validaciones del inventario KRE.
+-- Crea borrador -> tandas -> publica. No duplica una fecha existente.
+do $$
+declare demo_date date; demo_id uuid;
+begin
+ demo_date := (now() at time zone 'America/El_Salvador')::date
+   + ((5-extract(isodow from (now() at time zone 'America/El_Salvador'))::int+6)%7)+1;
+ if not exists(select 1 from public.events where date=demo_date and start_time='18:00'::time) then
+   insert into public.events(date,status,start_time,end_time) values(demo_date,'draft','18:00','18:40') returning id into demo_id;
+   insert into public.slots(event_id,starts_at,ends_at)
+   select demo_id, ((demo_date+'18:00'::time) at time zone 'America/El_Salvador')+make_interval(mins=>10*n),
+     ((demo_date+'18:00'::time) at time zone 'America/El_Salvador')+make_interval(mins=>10*(n+1))
+   from generate_series(0,3) n;
+   update public.events set status='open' where id=demo_id;
+ end if;
+end $$;
