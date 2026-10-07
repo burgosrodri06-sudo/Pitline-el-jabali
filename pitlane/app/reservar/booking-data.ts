@@ -1,3 +1,5 @@
+// Catálogo temporal de visualización compartido con KRE. No autoriza reservas:
+// se reemplazará al recibir el contrato de Andrés; no agregar datos simulados.
 export type EventDate = {
   id: string;
   date: string;
