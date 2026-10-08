@@ -10,7 +10,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
-} from "./Icons";
+} from "@/components/ui/icons";
 import type { Catalog } from "@/domain/events/types";
 import { bookingHref, dateLabel, timeLabel } from "@/lib/catalog";
 import { EventCard } from "./EventCard";

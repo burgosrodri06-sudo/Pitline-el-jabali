@@ -2,7 +2,7 @@
 import { cx } from "./styles";
 import type { KartingEvent } from "@/domain/events/types";
 import { dateLabel } from "@/lib/catalog";
-import { ArrowUpRight } from "./Icons";
+import { ArrowUpRight } from "@/components/ui/icons";
 export function EventCard({
   event,
   selected,

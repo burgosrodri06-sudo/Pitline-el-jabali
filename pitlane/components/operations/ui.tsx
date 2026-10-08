@@ -44,34 +44,8 @@ export function OperationsShell({
     </main>
   );
 }
-const labels: Record<string, string> = {
-  pending_payment: "Pendiente de pago",
-  payment_review: "En revisión",
-  paid: "Pagada",
-  cancelled: "Cancelada",
-  expired: "Expirada",
-  attended: "Con asistencia",
-  no_show: "No asistió",
-  pending: "Pendiente",
-  uploaded: "Por revisar",
-  approved: "Aprobado",
-  rejected: "Rechazado",
-  reconciled: "Conciliado",
-  available: "Disponible",
-  full: "Completa",
-  closed: "Cerrada",
-  bank_transfer: "Transferencia",
-  track_cash: "Efectivo en pista",
-  credit: "Crédito",
-};
-export function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={styles.badge} data-status={status}>
-      {labels[status] ?? status}
-    </span>
-  );
-}
-export const statusLabel = (status: string) => labels[status] ?? status;
+// Etiquetas y tonos de estado: mapa único en components/ui/status.
+export { StatusBadge, statusLabel } from "@/components/ui/status";
 export const money = (value: number) =>
   new Intl.NumberFormat("es-SV", { style: "currency", currency: "USD" }).format(
     value,
