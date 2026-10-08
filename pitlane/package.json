@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs tests/reservations/submission.test.mjs tests/reservations/receipts.test.mjs tests/operations.test.mjs tests/operations/database.test.mjs tests/operations/capacity.test.mjs",
+    "test": "node --test modules/check-in/check-in.test.mjs tests/booking-preparation.test.mjs tests/reservations/engine.test.mjs tests/reservations/submission.test.mjs tests/reservations/receipts.test.mjs tests/operations.test.mjs tests/operations/database.test.mjs tests/operations/capacity.test.mjs tests/final-integration.test.mjs",
     "test:operations:concurrency": "node tests/operations/concurrency.mjs",
     "test:operations:visual": "node tests/operations/visual.mjs",
+    "test:reservations:local": "node tests/reservations/local-concurrency.mjs",
     "test:reservations:concurrency": "node tests/reservations/concurrency.mjs"
   },
   "dependencies": {

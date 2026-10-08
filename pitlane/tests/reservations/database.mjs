@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 // Only for disposable test databases. Auth identity emulates Supabase's JWT GUC.
-export async function bootstrap(db, beforeReceipts = '') {
+export async function bootstrap(db) {
   await db.exec(`
     do $$ begin
       if not exists(select from pg_roles where rolname='anon') then create role anon nologin; end if;
@@ -29,7 +29,6 @@ export async function bootstrap(db, beforeReceipts = '') {
   `);
   const directory = new URL("../../supabase/migrations/", import.meta.url);
   for (const name of (await readdir(directory)).filter(name => name.endsWith(".sql")).sort()) {
-    if (name.startsWith('20261008000000') && beforeReceipts) await db.exec(beforeReceipts);
     await db.exec(await readFile(new URL(name, directory), "utf8"));
   }
 }

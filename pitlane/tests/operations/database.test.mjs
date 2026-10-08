@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { before, after, test } from "node:test";
-import { createDatabase, seed, asUser, finishSlotForTest } from "./database.mjs";
+import { createDatabase, seed, asUser, finishSlotForTest, users } from "./database.mjs";
+import { randomUUID } from 'node:crypto';
 let db;
 before(async () => {
   db = await createDatabase();
@@ -16,15 +17,18 @@ test("motor web integrado: reserva real de Gabriel llega a aprobación y check-i
       [f.slot, f.pkg, JSON.stringify([{ full_name: "Piloto Web" }])],
     ))).rows[0].r;
     assert.equal(reservation.status, "pending_payment");
-    // The upload/payment submission module is outside this PR. Seed only that
-    // handoff; reservation and participants above come from the real web RPC.
-    await db.query("update reservations set status='payment_review' where id=$1", [reservation.id]);
-    const payment = (await db.query(
-      `insert into payments(reservation_id,amount,method,reference,last4,receipt_path,status)
-       values($1,$2,'bank_transfer','WEB-1','1234','test/web.png','uploaded') returning id`,
-      [reservation.id, reservation.amount],
-    )).rows[0].id;
-    await db.exec("insert into storage.objects(bucket_id,name) values('payment-receipts','test/web.png')");
+    // Real receipt handoff. Only Storage's external object write is emulated.
+    const args = [users.pilot, reservation.id, randomUUID(), 'a'.repeat(64), 'WEB-1', '1234'];
+    const receipt = async finalize => {
+      await db.exec('set role service_role');
+      try { return (await db.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,$7) r', [...args,finalize])).rows[0].r; }
+      finally { await db.exec('reset role'); }
+    };
+    const attempt = await receipt(false);
+    await db.query("insert into storage.objects(bucket_id,name) values('payment-receipts',$1)",[attempt.objectPath]);
+    const submitted = await receipt(true);
+    assert.deepEqual(await receipt(true),submitted);
+    const payment = submitted.paymentId;
     await asUser(db, "payments", () => db.query("select operations_review_payment($1,'approve')", [payment]));
     const token = (await db.query("select qr_token from reservations where id=$1", [reservation.id])).rows[0].qr_token;
     const checked = await asUser(db, "staff", () => db.query("select operations_check_in($1,$2)", [f.slot, "pitlane:qr:" + token]));

@@ -242,6 +242,42 @@ try {
       console.log(`PASS: ${channel} sale versus capacity edit (${editFirst ? "edit" : "sale"} first).`);
     }
   }
+  // Real receipt RPCs compete on the same slot lock; Storage bytes remain an HTTP staging test.
+  const receiptSlot = (await admin.query(`insert into slots(event_id,starts_at,ends_at,capacity)
+    values($1,now()+interval '160 minutes',now()+interval '170 minutes',10) returning id`, [f.event])).rows[0].id;
+  const receiptA = await connect(); const receiptB = await connect();
+  await receiptA.query('set role service_role'); await receiptB.query('set role service_role');
+  async function receiptFixture() {
+    const r = (await web.query('select create_reservation($1,$2,$3::jsonb,$4,true) r',
+      [receiptSlot,f.pkg,JSON.stringify([{ full_name: 'Receipt race' }]),randomUUID()])).rows[0].r;
+    const args = [users.pilot,r.id,randomUUID(),'a'.repeat(64),randomUUID(),'1234'];
+    const prepared = (await receiptA.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,false) r',args)).rows[0].r;
+    await admin.query("insert into storage.objects(bucket_id,name) values('payment-receipts',$1)",[prepared.objectPath]);
+    return { r,args };
+  }
+  const one = await receiptFixture();
+  const [submitted, retry] = await race(admin,receiptA,receiptB,
+    ()=>receiptA.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,true) r',one.args),
+    ()=>receiptB.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,true) r',one.args));
+  assert.deepEqual(retry.value.rows,submitted.rows);
+  assert.equal((await admin.query('select count(*)::int n from payments where reservation_id=$1',[one.r.id])).rows[0].n,1);
+  console.log('PASS: simultaneous receipt finalizations create exactly one payment.');
+  const two = await receiptFixture();
+  const competingArgs = [...two.args]; competingArgs[2]=randomUUID();
+  const [, duplicate] = await race(admin,receiptA,receiptB,
+    ()=>receiptA.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,true) r',two.args),
+    ()=>receiptB.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,false) r',competingArgs));
+  assert.match(duplicate.error?.message ?? '',/resubmission_blocked/);
+  console.log('PASS: different concurrent receipt attempt cannot create another payment.');
+  const three = await receiptFixture();
+  const locker = await connect();
+  const [, expired] = await race(admin,locker,receiptB,async()=>{
+    await locker.query('select id from slots where id=$1 for update',[receiptSlot]);
+    return locker.query("update reservations set expires_at=clock_timestamp()-interval '1 second' where id=$1",[three.r.id]);
+  },()=>receiptB.query('select prepare_payment_receipt($1,$2,$3,$4,$5,$6,true) r',three.args));
+  assert.match(expired.error?.message ?? '',/expired_or_unavailable/);
+  assert.equal((await admin.query('select count(*)::int n from payments where reservation_id=$1',[three.r.id])).rows[0].n,0);
+  console.log('PASS: receipt finalization rechecks expiry after waiting for slot lock.');
 } finally {
   await Promise.allSettled(clients.map((c) => c.end()));
   await cluster.stop();
