@@ -71,23 +71,23 @@ export default function LoginPage() {
         <PasswordField label="Contraseña" name="password" autoComplete="current-password" />
 
         {unverifiedEmail && (
-          <div role="alert" className="rounded-md border border-[#2A2A2A] bg-[#1A1A1A] p-4 text-sm">
+          <div role="alert" className="rounded-md border border-line bg-surface p-4 text-sm">
             <p>Primero verifica tu correo con el enlace que te enviamos a {unverifiedEmail}.</p>
             <button
               type="button"
               onClick={handleResend}
               disabled={resend !== "idle"}
-              className="mt-3 w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold disabled:text-[#A3A3A3]"
+              className="mt-3 w-full rounded-md border border-line px-4 py-3 text-base font-semibold disabled:text-muted"
             >
               {resend === "sending" ? "Enviando..." : resend === "sent" ? "Correo reenviado" : "Reenviar correo"}
             </button>
           </div>
         )}
 
-        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="text-right">
-          <Link href="/recuperar-contrasena" className="text-sm text-[#A3A3A3] underline">
+          <Link href="/recuperar-contrasena" className="text-sm text-muted underline">
             Olvidé mi contraseña
           </Link>
         </div>
@@ -97,9 +97,9 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-[#A3A3A3]">
+      <p className="mt-8 text-center text-sm text-muted">
         ¿No tienes cuenta?{" "}
-        <Link href={withNext("/registro", nextPath)} className="font-semibold text-[#F4F4F4] underline">
+        <Link href={withNext("/registro", nextPath)} className="font-semibold text-ink underline">
           Crea una
         </Link>
       </p>

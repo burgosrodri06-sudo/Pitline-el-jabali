@@ -59,7 +59,7 @@ export default function VerificarCorreoPage() {
         subtitle="Te enviamos un enlace para verificar tu cuenta. Ábrelo desde tu teléfono y vuelve aquí."
       />
 
-      <div className="rounded-md border border-[#2A2A2A] bg-[#1A1A1A] p-4 text-sm text-[#A3A3A3]">
+      <div className="rounded-md border border-line bg-surface p-4 text-sm text-muted">
         Si no lo ves en unos minutos, revisa la carpeta de spam o promociones.
       </div>
 
@@ -74,13 +74,13 @@ export default function VerificarCorreoPage() {
           <button
             type="submit"
             disabled={resent}
-            className="w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold disabled:text-[#A3A3A3]"
+            className="w-full rounded-md border border-line px-4 py-3 text-base font-semibold disabled:text-muted"
           >
             {resent ? "Correo reenviado" : "Reenviar correo"}
           </button>
         </form>
 
-        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
       </div>
     </>
   );

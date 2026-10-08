@@ -67,16 +67,16 @@ export default function PerfilForm({ userId, name: initialName, email, phone: in
         {/* El correo no se edita aquí: cambiarlo requiere verificarlo de nuevo. */}
         <div>
           <span className="mb-1.5 block text-sm font-medium">Correo</span>
-          <p className="rounded-md border border-[#2A2A2A] px-3 py-3 text-[#A3A3A3]">{email}</p>
+          <p className="rounded-md border border-line px-3 py-3 text-muted">{email}</p>
         </div>
 
-        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button type="submit" className={`${primaryButton} mt-2`}>
           Guardar cambios
         </button>
         {saved && (
-          <p role="status" className="text-center text-sm text-[#7BD88F]">
+          <p role="status" className="text-center text-sm text-success">
             Cambios guardados.
           </p>
         )}
@@ -85,7 +85,7 @@ export default function PerfilForm({ userId, name: initialName, email, phone: in
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-8 w-full rounded-md border border-[#2A2A2A] px-4 py-3 text-base font-semibold"
+        className="mt-8 w-full rounded-md border border-line px-4 py-3 text-base font-semibold"
       >
         Cerrar sesión
       </button>

@@ -86,7 +86,7 @@ export default function RegistroPage() {
             {PASSWORD_RULES.map((rule) => {
               const ok = rule.test(password);
               return (
-                <li key={rule.label} className={ok ? "text-[#7BD88F]" : "text-[#A3A3A3]"}>
+                <li key={rule.label} className={ok ? "text-success" : "text-muted"}>
                   <span aria-hidden="true">{ok ? "✓" : "○"}</span> {rule.label}
                   <span className="sr-only">{ok ? " (cumplido)" : " (pendiente)"}</span>
                 </li>
@@ -102,23 +102,23 @@ export default function RegistroPage() {
               type="checkbox"
               name="terms"
               aria-invalid={errors.terms ? true : undefined}
-              className="mt-0.5 h-5 w-5 shrink-0 accent-[#C8102E]"
+              className="mt-0.5 h-5 w-5 shrink-0 accent-brand"
             />
             <span>Acepto los términos y condiciones y la política de privacidad.</span>
           </label>
-          {errors.terms && <span className="mt-1 block text-sm text-[#FF6B6B]">{errors.terms}</span>}
+          {errors.terms && <span className="mt-1 block text-sm text-danger">{errors.terms}</span>}
         </div>
 
-        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button type="submit" disabled={loading} className={`${primaryButton} mt-2`}>
           {loading ? "Creando cuenta..." : "Crear cuenta"}
         </button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-[#A3A3A3]">
+      <p className="mt-8 text-center text-sm text-muted">
         ¿Ya tienes cuenta?{" "}
-        <Link href={withNext("/login", nextPath)} className="font-semibold text-[#F4F4F4] underline">
+        <Link href={withNext("/login", nextPath)} className="font-semibold text-ink underline">
           Inicia sesión
         </Link>
       </p>
