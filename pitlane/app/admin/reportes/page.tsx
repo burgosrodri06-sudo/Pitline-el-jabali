@@ -105,7 +105,7 @@ export default async function Reports({
             <option value="track_cash">Efectivo en pista</option>
           </select>
         </label>
-        <button className={styles.button}>Consultar</button>
+        <button className={`${styles.button} ${styles.secondary}`}>Consultar</button>
         <a
           className={styles.link}
           href={`/admin/reportes/exportar?${csvQuery}`}
@@ -158,7 +158,7 @@ export default async function Reports({
             créditos.
           </p>
           {creditCandidates.length ? (
-            <ActionForm action={creditAction} label="Cancelar y emitir crédito">
+            <ActionForm action={creditAction} label="Cancelar y emitir crédito" variant="danger">
               <label className={styles.label}>
                 Reserva
                 <select className={styles.input} name="reservationId" required>

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { IScannerControls } from "@zxing/browser";
+import { Close, ScanLine } from "@/components/ui/icons";
 import styles from "./operations.module.css";
 export function ScanInput() {
   const [code, setCode] = useState("");
@@ -47,32 +48,22 @@ export function ScanInput() {
   }, [active]);
   return (
     <>
-      <label className={styles.label}>
-        Código de reserva o QR
-        <input
-          className={styles.input}
-          name="lookup"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          maxLength={100}
-          required
-          autoComplete="off"
-          placeholder="KRE-…"
-        />
-      </label>
       <button
         type="button"
-        className={`${styles.button} ${styles.secondary}`}
+        className={`${styles.button} ${active ? styles.secondary : ""}`}
+        data-size="lg"
+        aria-pressed={active}
         onClick={() => {
           setError("");
           setActive(!active);
         }}
       >
-        {active ? "Cerrar cámara" : "Escanear QR con cámara"}
+        {active ? <Close size={22} /> : <ScanLine size={24} />}
+        {active ? "Cerrar cámara" : "Escanear QR"}
       </button>
       {active && (
         <video
-          className={styles.video}
+          className={`${styles.video} w-full animate-fade`}
           ref={video}
           autoPlay
           muted
@@ -80,9 +71,23 @@ export function ScanInput() {
           aria-label="Vista de cámara para leer QR"
         />
       )}
+      <label className={styles.label}>
+        <span className="text-muted">o escribe el código de reserva</span>
+        <input
+          className={`${styles.input} font-mono tracking-wider`}
+          name="lookup"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          maxLength={100}
+          required
+          autoComplete="off"
+          autoCapitalize="characters"
+          placeholder="KRE-…"
+        />
+      </label>
       {code && (
         <p className={styles.muted}>
-          Verifica la tanda seleccionada antes de registrar la entrada.
+          Código capturado. Verifica la tanda seleccionada antes de registrar la entrada.
         </p>
       )}
       {error && (

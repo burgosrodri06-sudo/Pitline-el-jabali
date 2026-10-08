@@ -1,8 +1,4 @@
-import { InventoryShell } from "@/components/kre/InventoryShell";
+import { PageSkeleton } from "@/components/ui/feedback";
 export default function Loading() {
-  return (
-    <InventoryShell>
-      <p role="status">Consultando fechas y disponibilidad…</p>
-    </InventoryShell>
-  );
+  return <PageSkeleton label="Consultando fechas y disponibilidad…" />;
 }

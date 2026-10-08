@@ -56,7 +56,7 @@ export default function RecuperarPage() {
       </form>
 
       <p className="mt-8 text-center text-sm">
-        <Link href="/login" className="text-[#A3A3A3] underline">
+        <Link href="/login" className="text-muted underline">
           Volver a iniciar sesión
         </Link>
       </p>

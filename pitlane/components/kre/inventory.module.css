@@ -1,39 +1,33 @@
 .root {
-  min-height: 100vh;
-  background: #0c0d10;
-  color: #f1f1f3;
-  font-family: Arial, sans-serif;
-  padding: 28px max(20px, calc((100vw - 1160px) / 2)) 80px;
+  min-height: 100%;
+  background: var(--pl-bg);
+  color: var(--pl-text);
+  padding: 40px max(20px, calc((100% - 1160px) / 2)) 80px;
 }
 .root * {
   box-sizing: border-box;
 }
-.root header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  border-bottom: 1px solid #303138;
-  padding-bottom: 24px;
-}
 .root nav {
   display: flex;
-  gap: 18px;
+  gap: 8px;
   flex-wrap: wrap;
+  margin: 24px 0;
 }
 .root a {
   color: inherit;
 }
 .root h1 {
-  font-size: clamp(32px, 6vw, 58px);
-  font-weight: 900;
-  line-height: 1.08;
-  margin: 24px 0 14px;
+  font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1;
+  margin: 0 0 14px;
   text-transform: uppercase;
 }
 .root h2 {
-  font-size: 24px;
-  font-weight: 800;
+  font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
   margin: 12px 0;
 }
 .root h3 {
@@ -42,16 +36,16 @@
 }
 .root p {
   line-height: 1.6;
-  color: #b9bbc3;
+  color: var(--pl-muted);
   margin: 10px 0;
 }
 .root :global(.eyebrow) {
-  color: #ff454c;
+  color: var(--pl-red-text);
   text-transform: uppercase;
   letter-spacing: 3px;
   font-size: 12px;
-  font-weight: 800;
-  margin-top: 34px;
+  font-weight: 600;
+  margin-top: 0;
 }
 .root :global(.grid) {
   display: grid;
@@ -62,9 +56,9 @@
 .root article,
 .root section {
   padding: 24px;
-  border: 1px solid #303138;
-  background: #15161b;
-  border-radius: 12px;
+  border: 1px solid var(--pl-border);
+  background: var(--pl-surface);
+  border-radius: var(--pl-radius);
   margin: 20px 0;
 }
 .root :global(.grid) article {
@@ -75,7 +69,7 @@
   flex-direction: column;
   gap: 7px;
   font-size: 13px;
-  color: #c9cad1;
+  color: var(--pl-muted);
 }
 .root fieldset {
   border: 0;
@@ -88,10 +82,10 @@
 }
 .root input,
 .root select {
-  background: #0d0e12;
+  background: var(--pl-bg);
   color: white;
-  border: 1px solid #484b56;
-  border-radius: 5px;
+  border: 1px solid var(--pl-border-strong);
+  border-radius: var(--pl-radius);
   padding: 11px;
   max-width: 100%;
   color-scheme: dark;
@@ -106,10 +100,10 @@
 .root button,
 .root :global(.cta) {
   display: inline-block;
-  background: #dc2530;
+  background: var(--pl-red);
   color: white;
   padding: 12px 18px;
-  border-radius: 5px;
+  border-radius: var(--pl-radius);
   border: 0;
   font-weight: 700;
   text-decoration: none;
@@ -117,44 +111,44 @@
 }
 .root button:hover,
 .root :global(.cta):hover {
-  background: #f13b45;
+  background: var(--pl-red-hover);
 }
 .root button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 .root :global(.success) {
-  color: #71e3a1;
+  color: var(--pl-success);
 }
 .root :global(.error) {
-  color: #ff9096;
+  color: var(--pl-danger);
 }
 .root :global(.muted) {
-  color: #a1a3ae;
+  color: var(--pl-muted);
 }
 .root :global(.badge) {
   display: inline-block;
   padding: 5px 9px;
-  background: #292b34;
+  background: var(--pl-surface-2);
   border-radius: 4px;
   font-size: 12px;
 }
 .root :global(.available) {
-  color: #72dfaa;
+  color: var(--pl-success);
 }
 .root :global(.low) {
-  color: #ffcd72;
+  color: var(--pl-warning);
 }
 .root :global(.slot-list) {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
   gap: 12px;
 }
 .root :global(.slot) {
   padding: 18px;
-  background: #0e0f13;
-  border: 1px solid #353741;
-  border-radius: 7px;
+  background: var(--pl-surface);
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius);
 }
 .root :global(.slot) strong {
   display: block;
@@ -169,7 +163,7 @@
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
-  border-left: 3px solid #dc2530;
+  border-left: 3px solid var(--pl-red);
   padding-left: 16px;
   margin: 24px 0;
 }
@@ -179,19 +173,15 @@
 }
 .root :global(.empty) {
   padding: 36px;
-  border: 1px dashed #484b56;
-  border-radius: 10px;
+  border: 1px dashed var(--pl-border-strong);
+  border-radius: var(--pl-radius);
 }
 .root :focus-visible {
-  outline: 3px solid #ffb0b4;
-  outline-offset: 4px;
+  outline: 2px solid var(--pl-text);
+  outline-offset: 2px;
 }
 @media (max-width: 640px) {
-  .root header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .root section,
+    .root section,
   .root article {
     padding: 18px;
   }
@@ -202,4 +192,76 @@
   .root select {
     width: 100%;
   }
+}
+
+/* Chips de fecha del calendario público */
+.root nav a[href] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--pl-border-strong);
+  border-radius: var(--pl-radius);
+  background: var(--pl-surface);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition:
+    border-color var(--pl-dur-fast),
+    background-color var(--pl-dur-fast);
+}
+.root nav a[href]:hover {
+  border-color: var(--pl-muted);
+}
+.root nav a[href][aria-current] {
+  background: var(--pl-red);
+  border-color: var(--pl-red);
+  color: #fff;
+}
+.root h2::first-letter {
+  text-transform: uppercase;
+}
+.root :global(.slot) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color var(--pl-dur-fast);
+}
+.root :global(.slot):hover {
+  border-color: var(--pl-border-strong);
+}
+.root :global(.slot) strong {
+  font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+}
+.root :global(.slot) p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+.root :global(.slot) :global(.cta),
+.root :global(.slot) button {
+  margin-top: 10px;
+  text-align: center;
+  background: transparent;
+  border: 1px solid var(--pl-border-strong);
+  color: var(--pl-text);
+}
+.root :global(.slot) :global(.cta):hover {
+  background: var(--pl-red);
+  border-color: var(--pl-red);
+}
+.root :global(.grid) article h2 {
+  font-size: 34px;
+  font-variant-numeric: tabular-nums;
+}
+.root button:global(.refresh) {
+  margin-right: 12px;
+  background: var(--pl-surface-2);
+  border: 1px solid var(--pl-border-strong);
+  color: var(--pl-text);
+}
+.root button:global(.refresh):hover {
+  border-color: var(--pl-muted);
 }

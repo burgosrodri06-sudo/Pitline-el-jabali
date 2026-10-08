@@ -1,20 +1,118 @@
 @import "tailwindcss";
 
-/* Colores del sistema: fondo #0A0A0A y texto #F4F4F4 (solo tema oscuro). */
+/*
+ * Sistema visual PitLane · "El Jabalí Digital Paddock" (solo tema oscuro).
+ * Capa 1: valores base. Capa 2: tokens semánticos (--pl-*), que también leen los CSS modules.
+ * Los CSS modules usan var(--pl-*, <respaldo>) para seguir funcionando si se renderizan aislados.
+ */
 :root {
-  --background: #0a0a0a;
-  --foreground: #f4f4f4;
+  /* Asfalto y grafito */
+  --pl-bg: #0b0b0c;
+  --pl-surface: #141416;
+  --pl-surface-2: #1c1c1f;
+  --pl-surface-3: #26262a;
+  --pl-border: #2a2a2e;
+  --pl-border-strong: #3d3d43;
+
+  /* Texto */
+  --pl-text: #f4f3ef;
+  --pl-muted: #a8a8b0;
+  --pl-subtle: #85858e;
+
+  /* Rojo de carrera: acción principal, selección y navegación activa */
+  --pl-red: #c8102e;
+  --pl-red-hover: #a50d26;
+  --pl-red-text: #ff5a6e;
+  --pl-red-soft: rgb(200 16 46 / 0.14);
+
+  /* Estados (siempre acompañados de texto o icono) */
+  --pl-success: #46d18c;
+  --pl-success-soft: rgb(70 209 140 / 0.12);
+  --pl-warning: #f2b544;
+  --pl-warning-soft: rgb(242 181 68 / 0.12);
+  --pl-danger: #ff6b6b;
+  --pl-danger-soft: rgb(255 107 107 / 0.12);
+  --pl-info: #74a8ff;
+  --pl-info-soft: rgb(116 168 255 / 0.12);
+  --pl-neutral-soft: rgb(168 168 176 / 0.12);
+
+  /* Forma */
+  --pl-radius-sm: 2px;
+  --pl-radius: 4px;
+  --pl-radius-lg: 6px;
+
+  /* Movimiento */
+  --pl-dur-fast: 140ms;
+  --pl-dur: 220ms;
+  --pl-dur-slow: 300ms;
+  --pl-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Compatibilidad con los nombres anteriores */
+  --background: var(--pl-bg);
+  --foreground: var(--pl-text);
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-barlow);
-  --font-display: var(--font-barlow-condensed);
+  --color-background: var(--pl-bg);
+  --color-foreground: var(--pl-text);
+  --color-surface: var(--pl-surface);
+  --color-surface-2: var(--pl-surface-2);
+  --color-surface-3: var(--pl-surface-3);
+  --color-line: var(--pl-border);
+  --color-line-strong: var(--pl-border-strong);
+  --color-ink: var(--pl-text);
+  --color-muted: var(--pl-muted);
+  --color-subtle: var(--pl-subtle);
+  --color-brand: var(--pl-red);
+  --color-brand-hover: var(--pl-red-hover);
+  --color-brand-text: var(--pl-red-text);
+  --color-success: var(--pl-success);
+  --color-warning: var(--pl-warning);
+  --color-danger: var(--pl-danger);
+  --color-info: var(--pl-info);
+  --font-sans: var(--font-barlow), Arial, sans-serif;
+  --font-display: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --animate-enter: pl-enter var(--pl-dur-slow) var(--pl-ease) both;
+  --animate-fade: pl-fade var(--pl-dur) var(--pl-ease) both;
+}
+
+@keyframes pl-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes pl-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--pl-bg);
+  color: var(--pl-text);
   font-family: var(--font-barlow), Arial, sans-serif;
+}
+
+::selection {
+  background: var(--pl-red);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pl-text);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

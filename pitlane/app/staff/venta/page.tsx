@@ -75,7 +75,7 @@ export default async function TrackSales({
             ))}
           </select>
         </label>
-        <button className={styles.button}>Actualizar cupos</button>
+        <button className={`${styles.button} ${styles.secondary}`}>Actualizar cupos</button>
       </form>
       {!slot ? (
         <EmptyState>

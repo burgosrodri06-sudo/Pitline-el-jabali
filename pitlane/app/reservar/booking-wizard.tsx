@@ -9,6 +9,8 @@ import { formatDate, formatSlot, formatTime, formatPrice, formatParticipants, MA
 import type { BookingCatalog } from '@/lib/services/booking-catalog';
 import { createAttemptKeys, createSubmissionRunner, isReceipt, reservationMessages } from '@/domain/reservations/submission';
 import { submitReservation } from './actions';
+import { ArrowRight, Check } from "@/components/ui/icons";
+import { StatusBadge } from "@/components/ui/status";
 import styles from "./booking.module.css";
 
 const steps = ["Fecha", "Tanda", "Experiencia", "Resumen"];
@@ -105,7 +107,7 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
     <div lang="es-SV" className={styles.page}>
       <a href="#booking" className={styles.skipLink}>Saltar a la reserva</a>
 
-      <main className={`mx-auto w-full max-w-7xl px-5 py-10 sm:px-10 sm:py-14 ${styles.main}`}>
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <div className={styles.hero}>
           <div><p className={styles.eyebrow}>EXPERIENCIA DE KARTING</p><h1>LA PISTA<br />TE ESPERA<span>.</span></h1><p className={styles.intro}>Elegí tu momento. Reuní a tu equipo. Sentí El Jabalí.</p></div>
           <div className={styles.raceFacts}><span>VIERNES Y SÁBADOS PUBLICADOS</span><strong>6:00 p. m. — medianoche</strong><p>10 minutos por tanda <span aria-hidden="true">/</span> Hasta 10 karts</p></div>
@@ -117,15 +119,17 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
         {!catalogError && eventDates.length === 0 && <p role="status">No hay eventos publicados disponibles.</p>}
 
         <nav aria-label="Etapas de la reserva" className={styles.steps}><ol>
-          {steps.map((name, index) => <li key={name}><button type="button" aria-current={step === index ? "step" : undefined} disabled={locked || !accessibleSteps[index]} onClick={() => goToStep(index)}><span className={styles.stepNumber}>{String(index + 1).padStart(2, "0")}</span><span>{name}</span></button></li>)}
+          {steps.map((name, index) => <li key={name}><button type="button" aria-current={step === index ? "step" : undefined} data-done={index < step || undefined} disabled={locked || !accessibleSteps[index]} onClick={() => goToStep(index)}><span className={styles.stepNumber}>{index < step ? <Check size={14} /> : index + 1}</span><span>{name}</span></button></li>)}
         </ol></nav>
 
         <div id="booking" className={styles.bookingLayout}>
           <section className={styles.stage} aria-labelledby="stage-title">
+            <p className={styles.mobileSummary} aria-hidden="true"><span>{[date && formatDate(date.date), slot && formatSlot(slot), selectedPackage?.name].filter(Boolean).join(" · ") || "Aún no elegiste fecha"}</span>{(receipt || selectedPackage) && <strong>{receipt ? formatPrice(receipt.amount) : formatPrice(selectedPackage!.price)}</strong>}</p>
             <p className={styles.eyebrow}>PASO {String(step + 1).padStart(2, "0")} / 04</p>
             <h2 ref={headingRef} tabIndex={-1} id="stage-title">{titles[step]}</h2>
+            <div key={step} className={styles.stepBody}>
 
-            {step === 0 && <><p className={styles.helper}>Seleccioná una fecha publicada para tu reserva.</p><div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">{eventDates.map((item) => <Choice key={item.id} selected={dateId === item.id} disabled={locked} onClick={() => { if (dateId !== item.id) { setDateId(item.id); setSlotId(undefined); setPackageId(undefined); resetPreparation(1); } }}><span className={styles.dateLabel}>{formatDate(item.date, true)}</span><span className={styles.choiceMeta}>{item.date.slice(0, 4)} · Desde las 6:00 p. m.</span><span className={styles.choiceStatus}>{dateId === item.id ? "Seleccionada" : "Disponible"}<span aria-hidden="true">↗</span></span></Choice>)}</div><p className={styles.footnote}>Solo operamos en las fechas publicadas de viernes y sábado.</p></>}
+            {step === 0 && <><p className={styles.helper}>Seleccioná una fecha publicada para tu reserva.</p><div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">{eventDates.map((item) => <Choice key={item.id} selected={dateId === item.id} disabled={locked} onClick={() => { if (dateId !== item.id) { setDateId(item.id); setSlotId(undefined); setPackageId(undefined); resetPreparation(1); } }}><span className={styles.dateLabel}>{formatDate(item.date, true)}</span><span className={styles.choiceMeta}>{item.date.slice(0, 4)} · Desde las 6:00 p. m.</span><span className={styles.choiceStatus}>{dateId === item.id ? "Seleccionada" : "Disponible"}{dateId === item.id ? <Check size={18} /> : <ArrowRight size={18} />}</span></Choice>)}</div><p className={styles.footnote}>Solo operamos en las fechas publicadas de viernes y sábado.</p></>}
 
             {step === 1 && <><p className={styles.helper}>{date && formatDate(date.date)}. Cada tanda dura 10 minutos.</p><div className={styles.legend}><span>Disponible: 5–10 karts</span><span className={styles.low}>Últimos cupos: 1–4</span><span>Agotada: 0</span></div><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{slots.filter((item) => item.eventDateId === dateId).map((item) => <Choice key={item.id} selected={slotId === item.id} disabled={locked || item.remainingKarts === 0} label={`${formatSlot(item)}, ${item.remainingKarts} de ${item.capacity ?? MAX_KARTS} karts disponibles`} onClick={() => { if (item.remainingKarts > 0 && slotId !== item.id) { setSlotId(item.id); const clearPackage = !selectedPackage || selectedPackage.karts > item.remainingKarts; if (clearPackage) setPackageId(undefined); resetPreparation(clearPackage ? 1 : undefined); } }}><strong className={styles.slotTime}>{item.startsAt ? new Intl.DateTimeFormat("es-SV", { timeZone: "America/El_Salvador", hour: "numeric", minute: "2-digit" }).format(new Date(item.startsAt)) : formatTime(item.startMinutes)}</strong><span className={`${styles.choiceMeta} ${item.remainingKarts > 0 && item.remainingKarts < 5 ? styles.low : ""}`}>{item.remainingKarts === 0 ? "Agotada · 0 karts" : `${item.remainingKarts} de ${item.capacity ?? MAX_KARTS} karts libres`}</span><span className={styles.slotStatus}>{slotId === item.id ? "Seleccionada" : item.remainingKarts === 0 ? "Sin cupos" : item.remainingKarts < 5 ? "Últimos cupos" : "Disponible"}</span></Choice>)}</div><p className={styles.footnote}>La última tanda sale a las 11:50 p. m. y termina a medianoche.</p></>}
 
@@ -191,14 +195,16 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
               <p id="preparation-help" className={styles.footnote}>Completá todos los nombres y aceptá las reglas para solicitar un apartado pendiente de pago. Se mantienen solo mientras estés en esta pantalla.</p>
             </>}
 
+            </div>
+
             <div className={styles.actions}>{step > 0 && <button type="button" className={styles.backButton} onClick={() => goToStep(step - 1)}>← Volver</button>}<button type={step === 3 ? "submit" : "button"} form={step === 3 ? "reservation-preparation" : undefined} aria-describedby={step === 3 ? "preparation-help" : undefined} className={styles.primaryButton} disabled={(!canContinue && !uncertain) || sending || Boolean(receipt) || (step === 3 && (!bookingEnabled || !authenticated))} onClick={() => { if (canContinue && step < 3) goToStep(step + 1); }}>{step === 3 ? (sending ? "Enviando…" : uncertain ? "Reintentar el mismo apartado" : "Crear apartado pendiente de pago") : `Continuar a ${steps[step + 1].toLowerCase()}`}<span aria-hidden="true">→</span></button></div>
             {!canContinue && step < 3 && <p className={styles.footnote}>Seleccioná {step === 0 ? "una fecha" : step === 1 ? "una tanda disponible" : "una experiencia disponible"} para continuar.</p>}
             {authenticated && !verified && !receipt && <p role="status">Confirmá tu correo antes de reservar. <Link href="/verificar-correo" target="_blank" rel="noopener noreferrer">Abrir verificación en otra pestaña</Link>; después reintentá aquí para conservar tus datos.</p>}
             {error && <div ref={noticeRef} tabIndex={-1} role="alert" className={styles.preparationNotice}><p>{reservationMessages[error] ?? reservationMessages.reservation_unavailable}</p>{error === 'authentication_required' && <Link href={bookingLoginHref({ dateId, slotId, packageId })}>Volver a iniciar sesión</Link>}</div>}
-            {receipt && <div ref={noticeRef} tabIndex={-1} role="status" className={styles.preparationNotice}>
+            {receipt && <div ref={noticeRef} tabIndex={-1} role="status" className={`${styles.preparationNotice} ${styles.receipt}`}>
               <strong>{receipt.status === 'pending_payment' ? 'Apartado pendiente de pago' : 'Estado de tu reserva'}</strong>
-              <dl><SummaryRow label="Código">{receipt.code}</SummaryRow><SummaryRow label="Monto real USD">{formatPrice(receipt.amount)}</SummaryRow><SummaryRow label="Estado del backend">{receipt.status}</SummaryRow><SummaryRow label="Vencimiento">{new Intl.DateTimeFormat('es-SV', { timeZone: 'America/El_Salvador', dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(receipt.expiresAt!))}</SummaryRow></dl>
-              {receipt.status === 'pending_payment' && <Link href={'/reservas/' + receipt.id + '/pago'}>Enviar comprobante para revisión</Link>}
+              <dl><SummaryRow label="Código">{receipt.code}</SummaryRow><SummaryRow label="Monto real USD">{formatPrice(receipt.amount)}</SummaryRow><SummaryRow label="Estado"><StatusBadge status={receipt.status} /></SummaryRow><SummaryRow label="Vencimiento">{new Intl.DateTimeFormat('es-SV', { timeZone: 'America/El_Salvador', dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(receipt.expiresAt!))}</SummaryRow></dl>
+              {receipt.status === 'pending_payment' && <Link className={styles.payLink} href={'/reservas/' + receipt.id + '/pago'}>Enviar comprobante para revisión <ArrowRight size={18} /></Link>}
               {receipt.status === 'pending_payment' && <p>{now !== null && Date.parse(receipt.expiresAt!) <= now ? 'El plazo del apartado venció. No lo considerés confirmado.' : 'Todavía no está pagado ni confirmado. Podés enviar el comprobante para revisión en el entorno de pruebas.'}</p>}
             </div>}
           </section>

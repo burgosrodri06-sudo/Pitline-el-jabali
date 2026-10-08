@@ -1,7 +1,7 @@
 "use client";
 import { cx } from "./styles";
 import type { Package } from "@/domain/events/types";
-import { Check, ArrowUpRight } from "./Icons";
+import { Check, ArrowUpRight } from "@/components/ui/icons";
 export function PackageCard({
   item,
   selected,

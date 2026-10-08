@@ -54,7 +54,7 @@ export default function NuevaContrasenaPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <AuthField label="Contraseña nueva" name="password" type="password" autoComplete="new-password" error={errors.password} />
         <AuthField label="Confirma tu contraseña" name="confirm" type="password" autoComplete="new-password" error={errors.confirm} />
-        {error && <p className="text-sm text-[#FF6B6B]">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <button type="submit" className={`${primaryButton} mt-2`}>
           Guardar contraseña
         </button>

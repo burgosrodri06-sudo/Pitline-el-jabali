@@ -71,8 +71,13 @@ export default async function Calendar({
                 : "Fecha cancelada"}
           </span>
           <h2>
-            {event.date} · {event.start_time.slice(0, 5)} —{" "}
-            {event.end_time.slice(0, 5)}
+            {new Intl.DateTimeFormat("es-SV", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              timeZone: "America/El_Salvador",
+            }).format(new Date(event.date + "T12:00:00-06:00"))}{" "}
+            · {event.start_time.slice(0, 5)} — {event.end_time.slice(0, 5)}
           </h2>
           {!slots[i].length && <p>No hay tandas publicadas para esta fecha.</p>}
           <div className="slot-list">

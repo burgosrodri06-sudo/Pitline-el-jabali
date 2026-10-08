@@ -13,6 +13,8 @@ import {
   styles,
 } from "@/components/operations/ui";
 import { ReservationCard } from "@/components/operations/reservation-card";
+import { buttonClass } from "@/components/ui/button";
+import { ArrowRight } from "@/components/ui/icons";
 export default async function MyReservations({
   searchParams,
 }: {
@@ -37,14 +39,14 @@ export default async function MyReservations({
     >
       <div className={styles.fields}>
         <Link
-          className={styles.button}
+          className={buttonClass({ className: styles.button })}
           href="/karting/kartingrentalexperience/reservar"
         >
-          Reservar una tanda
+          Reservar una tanda <ArrowRight size={18} />
         </Link>
       </div>
       {credits.length > 0 && (
-        <section className={styles.card}>
+        <section className={styles.card} style={{ borderLeft: "2px solid var(--pl-success)" }}>
           <h2>Créditos a tu favor</h2>
           <p className={styles.metric}>
             {money(
@@ -68,7 +70,9 @@ export default async function MyReservations({
           </ul>
         </section>
       )}
-      <h2 className={styles.section}>Próximas reservas</h2>
+      <h2 className={styles.section}>
+        Próximas reservas{upcoming.length ? ` · ${upcoming.length}` : ""}
+      </h2>
       {upcoming.length ? (
         <div className={styles.grid}>
           {upcoming.map((r) => (
@@ -76,7 +80,12 @@ export default async function MyReservations({
           ))}
         </div>
       ) : (
-        <EmptyState>No hay próximas reservas en esta página.</EmptyState>
+        <EmptyState>
+          No hay próximas reservas en esta página.{" "}
+          <Link className="font-semibold text-brand-text underline underline-offset-4" href="/karting/kartingrentalexperience/reservar">
+            Elige una tanda
+          </Link>
+        </EmptyState>
       )}
       <h2 className={styles.section}>Historial</h2>
       {history.length ? (
