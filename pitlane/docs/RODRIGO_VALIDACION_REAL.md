@@ -1,5 +1,17 @@
 # Cierre de la entrega de Rodrigo
 
+## Actualización tras integrar main `b35cbea`
+
+El catálogo de Andrés, las rutas de tanda/pago y la conexión del wizard de Gabriel
+ya están en main e incorporados a la rama de Rodrigo. Los hallazgos G-01/G-02/G-03
+y el calendario ausente descritos abajo son el registro histórico de `c6c5047`;
+ya no deben interpretarse como rutas ausentes en el código actual. Falta su
+validación remota autenticada. Pasan 86 pruebas combinadas y 5 escenarios de
+concurrencia con todas las migraciones; los resultados remotos de abajo no se han
+revalidado durante esta resolución de conflictos.
+
+## Registro de la revisión anterior
+
 Estado al 7 de octubre de 2026, código `34cddb5`, main `c6c5047`, PR #14.
 Este documento registra lo comprobado y el procedimiento pendiente. No equivale
 a una aprobación de Andrés ni a una prueba completada en el teléfono de pista.

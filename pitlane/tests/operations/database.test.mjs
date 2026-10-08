@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { before, after, test } from "node:test";
-import { createDatabase, seed, asUser } from "./database.mjs";
+import { createDatabase, seed, asUser, finishSlotForTest } from "./database.mjs";
 let db;
 before(async () => {
   db = await createDatabase();
@@ -46,7 +46,7 @@ test("Friends permite asistencia parcial y no hereda la vuelta completada de otr
   assert.equal((await mark(participants[0].id)).rows[0].operations_check_in,1);
   assert.equal((await mark(null)).rows[0].operations_check_in,4);
   assert.equal((await mark(null)).rows[0].operations_check_in,0);
-  await db.query(`update slots set starts_at=now()-interval '12 minutes',ends_at=now()-interval '2 minutes' where id=$1`, [f.slot]);
+  await finishSlotForTest(db, f.slot);
   await asUser(db,'staff',()=>db.query('select operations_complete_ride($1)',[participants[0].id]));
   const next=(await db.query(`insert into slots(event_id,starts_at,ends_at) values($1,now()+interval '20 minutes',now()+interval '30 minutes') returning id`,[f.event])).rows[0].id;
   await denied(()=>asUser(db,'staff',()=>db.query('select operations_track_sale($1,$2,$3,gen_random_uuid(),$4)',[next,f.second,participants[1].full_name,participants[1].id])),/operations_first_ride_required/);
@@ -196,10 +196,7 @@ test("SQL real: aprobación → QR → check-in único → vuelta completada →
         ),
       /operations_ride_not_ready/,
     );
-    await db.query(
-      `update slots set starts_at=now()-interval '12 minutes',ends_at=now()-interval '2 minutes' where id=$1`,
-      [f.slot],
-    );
+    await finishSlotForTest(db, f.slot);
     await asUser(db, "staff", () =>
       db.query("select operations_complete_ride($1)", [f.participant]),
     );
@@ -275,17 +272,17 @@ test("capacidad: track no descuenta dos veces; attended sigue consumiendo; sobre
         .slot_available_spots,
       7,
     );
+    await db.query(
+      "update slots set capacity=2,track_reserved_spots=1 where id=$1",
+      [f.slot],
+    );
     await db.query(`update reservations set status='attended' where id=$1`, [
       f.reservation,
     ]);
     assert.equal(
       (await db.query("select slot_available_spots($1)", [f.slot])).rows[0]
         .slot_available_spots,
-      7,
-    );
-    await db.query(
-      "update slots set capacity=2,track_reserved_spots=1 where id=$1",
-      [f.slot],
+      0,
     );
     await denied(
       () =>
@@ -357,10 +354,7 @@ test("cierre registra ausencias una vez y bloquea check-in tardío", async () =>
     await asUser(db, "payments", () =>
       db.query(`select operations_review_payment($1,'approve')`, [f.payment]),
     );
-    await db.query(
-      `update slots set starts_at=now()-interval '12 minutes',ends_at=now()-interval '2 minutes' where id=$1`,
-      [f.slot],
-    );
+    await finishSlotForTest(db, f.slot);
     assert.equal(
       (
         await asUser(db, "staff", () =>

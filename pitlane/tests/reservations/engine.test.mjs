@@ -44,13 +44,14 @@ test("Individual and Friends persist trusted snapshots, exact participants and o
 
 test("DB price/spots are authoritative; retries preserve snapshots after catalog edits", async () => {
   const ids = await fixture(db);
-  await db.query("update public.packages set price=17.35,spots=5 where id=$1", [ids.individual]);
+  await db.query("update public.packages set name='Friends Combo',price=17.35,spots=5 where id=$1", [ids.individual]);
   await assert.rejects(asUser(db, ids.user, () => reserve(db, ids)), /participant_count_mismatch/);
   const options = { key: randomUUID(), names: ["A", "B", "C", "D", "E"] };
   const first = await asUser(db, ids.user, () => reserve(db, ids, options));
   assert.equal(first.rows[0].reservation.amount, 17.35);
   assert.equal(first.rows[0].reservation.spots, 5);
-  await db.query("update public.packages set price=99,spots=1,active=false where id=$1", [ids.individual]);
+  await assert.rejects(db.query("update public.packages set name='Individual',spots=1 where id=$1", [ids.individual]), /reservas/);
+  await db.query("update public.packages set price=99,active=false where id=$1", [ids.individual]);
   assert.deepEqual((await asUser(db, ids.user, () => reserve(db, ids, options))).rows, first.rows);
 });
 
@@ -156,9 +157,7 @@ test("unconfirmed email is rejected even with forged metadata; verified email en
 });
 
 test("near slot hold is positive and expires strictly before start", async () => {
-  const ids = await fixture(db);
-  await db.query("update public.slots set starts_at=clock_timestamp()+interval '2 minutes', ends_at=clock_timestamp()+interval '12 minutes' where id=$1", [ids.slot]);
-  await db.query("update public.events set date=(select (starts_at at time zone 'America/El_Salvador')::date from public.slots where id=$1) where id=$2", [ids.slot, ids.event]);
+  const ids = await fixture(db, { near: true });
   const receipt = (await asUser(db, ids.user, () => reserve(db, ids))).rows[0].reservation;
   const row = (await db.query(`select r.expires_at > r.created_at as positive,
     r.expires_at < s.starts_at as before_start, r.expires_at <= r.created_at+interval '15 minutes' as bounded
@@ -199,10 +198,15 @@ test("closed/past slots, events and inactive/date-ineligible packages are reject
   await db.query("update public.slots set status='available' where id=$1", [ids.slot]);
   await db.query("update public.packages set active=false where id=$1", [ids.individual]);
   await assert.rejects(asUser(db, ids.user, () => reserve(db, ids)), /package_unavailable/);
-  await db.query("update public.packages set active=true,valid_from=current_date+10 where id=$1", [ids.individual]);
+  await db.query("update public.packages set active=true,valid_from=(select date+10 from public.events where id=$2) where id=$1", [ids.individual, ids.event]);
   await assert.rejects(asUser(db, ids.user, () => reserve(db, ids)), /package_unavailable/);
   await db.query("update public.packages set valid_from=null where id=$1", [ids.individual]);
-  await db.query("update public.slots set starts_at=clock_timestamp()-interval '1 second' where id=$1", [ids.slot]);
+  await assert.rejects(db.query("update public.slots set starts_at=clock_timestamp()-interval '1 second' where id=$1", [ids.slot]), /10 minutos|pasado/);
+  // Solo en esta base desechable: simula una tanda histórica para probar también la defensa de la RPC.
+  await db.exec('alter table public.slots disable trigger kre_guard_slot');
+  try {
+    await db.query("update public.slots set starts_at=now()-interval '11 minutes',ends_at=now()-interval '1 minute' where id=$1", [ids.slot]);
+  } finally { await db.exec('alter table public.slots enable trigger kre_guard_slot'); }
   await assert.rejects(asUser(db, ids.user, () => reserve(db, ids)), /slot_unavailable/);
 });
 

@@ -107,6 +107,10 @@ try {
     1,
   );
   console.log("PASS: two reviewers approve once.");
+  await admin.query(
+    "update slots set capacity=2,track_reserved_spots=1 where id=$1",
+    [f.slot],
+  );
   const [checkin, repeatedCheckin] = await race(
     admin,
     a,
@@ -121,10 +125,6 @@ try {
     1,
   );
   console.log("PASS: two QR readers produce one attendance record.");
-  await admin.query(
-    "update slots set capacity=2,track_reserved_spots=1 where id=$1",
-    [f.slot],
-  );
   const [, soldOut] = await race(
     admin,
     a,

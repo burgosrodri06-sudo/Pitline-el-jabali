@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { eventDates, slots, packages } from "./booking-data";
+import { getBookingCatalog, type BookingCatalog } from '@/lib/services/booking-catalog';
+import { testBookingEnabled } from '@/domain/reservations/submission';
 import BookingWizard from "./booking-wizard";
+import { resolveBookingSelection } from './booking-form';
 
 export const metadata: Metadata = {
   title: "Reservar | PitLane · El Jabalí",
-  description: "Elegí tu fecha, tanda y experiencia de karting en El Jabalí. Prototipo con disponibilidad simulada.",
+  description: "Elegí tu fecha, tanda y experiencia de karting en El Jabalí.",
 };
 
 export default async function BookingPage({searchParams}: { searchParams: Promise<Record<string,string|string[]|undefined>> }) {
   const query = await searchParams;
-  const date = eventDates.find(item => item.id === query.evento);
-  const slot = slots.find(item => date && item.eventDateId === date.id && item.id === query.tanda && item.remainingKarts > 0);
-  const experience = packages.find(item => slot && item.id === query.paquete && item.karts <= slot.remainingKarts);
-  const initial = {dateId:date?.id,slotId:slot?.id,packageId:experience?.id};
+  let catalog: BookingCatalog = { eventDates: [], slots: [], packages: [] };
+  let catalogError = false;
+  try { catalog = await getBookingCatalog(); } catch { catalogError = true; }
+  const { initial, invalidSelection } = resolveBookingSelection(query, catalog);
   const user = await getCurrentUser();
   let principalName = "";
   if (user) {
@@ -34,5 +36,10 @@ export default async function BookingPage({searchParams}: { searchParams: Promis
     initial={initial}
     principalName={principalName}
     authenticated={Boolean(user)}
+    verified={Boolean(user?.email_confirmed_at)}
+    catalog={catalog}
+    catalogError={catalogError}
+    invalidSelection={!catalogError && invalidSelection}
+    bookingEnabled={testBookingEnabled(process.env)}
   />;
 }

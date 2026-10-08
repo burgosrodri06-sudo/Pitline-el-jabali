@@ -1,6 +1,7 @@
 # Operación — Rodrigo Burgos
 
-Rama `feature/operations`, actualizada con `main` (`c6c5047`, PR #13 de Gabriel).
+Rama `feature/operations`, actualizada con `main` (`b35cbea`: catálogo de Andrés,
+wizard y comprobantes de Gabriel, y cambios de autenticación del equipo).
 Implementación de P-05, P-07, P-08, P-11 y P-12. La migración se entrega por PR;
 no se ha aplicado al Supabase compartido ni se ha mergeado a main.
 
@@ -128,15 +129,19 @@ Resultados remotos, revisión de Rodrigo a Gabriel y recorrido de aceptación:
 consulta remota confirmó que faltan `operation_slot_closures` e
 `idempotency_key`; el acceso de la CLI todavía requiere `supabase login`.
 
-1. Orden acordado: Andrés → Gabriel → Rodrigo. Gabriel ya está en main por PR #13;
-   la entrega de Andrés y la revisión cruzada siguen pendientes de confirmar antes
-   del merge de Rodrigo. No se fusionan ramas de otros integrantes desde este PR.
+1. Andrés y Gabriel ya están integrados en main. Rodrigo incorpora esos cambios
+   en su rama; queda pendiente la revisión cruzada antes del merge de este PR.
 2. **Integración local resuelta (7 de octubre):** Gabriel alineó su esquema en
    `abd6142`; esta rama incorpora `main` en `c6c5047`. Se resolvieron los conflictos
    de dependencias/scripts conservando ambas suites. Los fixtures de Auth/Storage
    cubren ambas migraciones y la prueba de capacidad conserva cupos `attended` y
    `no_show`. Pasan 67 pruebas, lint, build con TypeScript y los 5 escenarios de
    concurrencia local.
+   Actualización con `b35cbea`: pasan 86 pruebas combinadas y los 5 escenarios de
+   concurrencia. Se conserva la suite de comprobantes y se elimina su segunda
+   aplicación de la migración de Rodrigo, que ya carga el bootstrap común.
+   Los fixtures publican eventos después de crear las tandas; únicamente en la
+   base desechable se simula el paso del tiempo antes de verificar cierre/vuelta.
 3. Aplicar la migración mediante el mecanismo de PR/merge del equipo y revisar
    tablas/políticas en Supabase. No crear tablas a mano en el dashboard.
 4. Probar con cuentas reales piloto/payments/staff/admin y comprobante de prueba,

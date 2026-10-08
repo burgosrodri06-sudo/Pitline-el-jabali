@@ -51,15 +51,17 @@ export async function seed(db) {
   }
   const e = (
     await db.query(`insert into events(date,status,start_time,end_time) values(
-    (clock_timestamp() at time zone 'America/El_Salvador')::date,'open','00:00','23:59') returning id`)
+    (statement_timestamp() at time zone 'America/El_Salvador')::date,'draft',
+    ((statement_timestamp()+interval '1 minute') at time zone 'America/El_Salvador')::time,'00:00') returning id`)
   ).rows[0].id;
   const s = (
     await db.query(
       `insert into slots(event_id,starts_at,ends_at,track_reserved_spots)
-    values($1,clock_timestamp()+interval '2 minutes',clock_timestamp()+interval '12 minutes',2) returning id`,
+    values($1,statement_timestamp()+interval '2 minutes',statement_timestamp()+interval '12 minutes',2) returning id`,
       [e],
     )
   ).rows[0].id;
+  await db.query("update events set status='open' where id=$1", [e]);
   const pkg = (
     await db.query(`select id from packages where name='Individual'`)
   ).rows[0].id;
@@ -116,5 +118,20 @@ export async function asUser(db, role, work) {
     await db.exec("reset role");
     await db.exec(`select set_config('request.jwt.claim.sub','',false)`);
     await db.exec("release savepoint user_work");
+  }
+}
+
+// Simulate elapsed time only in the disposable database. Production forbids
+// moving an occupied slot; disable only the calendar-edit guard during setup,
+// leaving attendance/payment guards unchanged for the actual assertions.
+export async function finishSlotForTest(db, slotId) {
+  await db.exec("alter table slots disable trigger kre_guard_slot");
+  await db.exec("alter table events disable trigger kre_guard_event");
+  try {
+    await db.query("update events set start_time=((now()-interval '20 minutes') at time zone 'America/El_Salvador')::time where id=(select event_id from slots where id=$1)", [slotId]);
+    await db.query("update slots set starts_at=now()-interval '12 minutes',ends_at=now()-interval '2 minutes' where id=$1", [slotId]);
+  } finally {
+    await db.exec("alter table events enable trigger kre_guard_event");
+    await db.exec("alter table slots enable trigger kre_guard_slot");
   }
 }
