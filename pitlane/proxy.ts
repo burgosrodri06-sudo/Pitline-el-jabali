@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   // Pasa la ruta actual a las páginas (la usa requireAuthenticatedUser para ?next=).
   function next() {
     const headers = new Headers(request.headers);
-    headers.set("x-pathname", request.nextUrl.pathname);
+    headers.set("x-pathname", request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.next({ request: { headers } });
   }
 
@@ -50,8 +50,11 @@ export async function proxy(request: NextRequest) {
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.search = `?next=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(url);
+    url.search = `?next=${encodeURIComponent(pathname + request.nextUrl.search)}`;
+    const redirectResponse = NextResponse.redirect(url);
+    response.cookies.getAll().forEach(cookie => redirectResponse.cookies.set(cookie));
+    redirectResponse.headers.set('Cache-Control', 'private, no-store');
+    return redirectResponse;
   }
 
   return response;

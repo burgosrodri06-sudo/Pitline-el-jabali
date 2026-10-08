@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { AuthField, AuthTitle, primaryButton } from "@/components/auth/ui";
 import { resendVerification } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
-import { safeNextPath, withNext } from "@/lib/auth/next-path";
+import { safeNextPath, useNextPath, withNext } from "@/lib/auth/next-path";
 
 // registro guarda el correo en sessionStorage antes de redirigir aquí.
 function readSignupEmail() {
@@ -31,7 +31,8 @@ export default function VerificarCorreoPage() {
   const [error, setError] = useState("");
   // null en el servidor; "" = no hay correo guardado y se muestra el campo.
   const storedEmail = useSyncExternalStore(noSubscribe, readSignupEmail, () => null);
-  const nextPath = useSyncExternalStore(noSubscribe, readSignupNext, () => null);
+  const storedNext = useSyncExternalStore(noSubscribe, readSignupNext, () => null);
+  const nextPath = useNextPath() ?? storedNext;
 
   async function handleResend(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

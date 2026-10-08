@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { getHomeForRole } from "@/lib/auth/home";
 import { safeNextPath, withNext } from "@/lib/auth/next-path";
@@ -48,11 +48,12 @@ export default function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-[#A3A3A3]">{user.name}</span>
+    <div className="flex flex-wrap items-center gap-4">
+      <span className="max-w-48 truncate text-sm text-[#A3A3A3]">{user.name}</span>
       <Link href="/perfil" className={linkClass}>
         Mi perfil
       </Link>
+      <Link href="/mis-reservas" className={linkClass}>Mis reservas</Link>
       {user.role !== "pilot" && (
         <Link href={getHomeForRole(user.role)} className={linkClass}>
           Mi panel
@@ -68,9 +69,12 @@ export default function UserMenu() {
 // Enlaces sin sesión. Conservan el ?next= de la página actual (p. ej. al pasar de registro a login).
 // useSearchParams (y no window.location) para que se actualice al navegar sin recargar el layout.
 function GuestLinks({ linkClass }: { linkClass: string }) {
-  const nextPath = safeNextPath(useSearchParams().get("next"));
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const nextPath = safeNextPath(params.get("next")) ?? (pathname === '/reservar'
+    ? safeNextPath(`${pathname}${params.size ? `?${params}` : ''}`) : null);
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center gap-4">
       <Link href={withNext("/login", nextPath)} className={linkClass}>
         Iniciar sesión
       </Link>

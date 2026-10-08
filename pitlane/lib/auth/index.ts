@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/types";
+import { safeNextPath, withNext } from './redirects';
 
 export { getHomeForRole } from "./home";
 
@@ -19,7 +20,7 @@ export async function requireAuthenticatedUser() {
   const user = await getCurrentUser();
   if (!user) {
     // proxy.ts pone la ruta actual en x-pathname.
-    const pathname = (await headers()).get("x-pathname") ?? "/";
+    const pathname = safeNextPath((await headers()).get("x-pathname")) ?? "/";
     redirect(`/login?next=${encodeURIComponent(pathname)}`);
   }
   return user;
@@ -27,7 +28,7 @@ export async function requireAuthenticatedUser() {
 
 export async function requireVerifiedUser() {
   const user = await requireAuthenticatedUser();
-  if (!user.email_confirmed_at) redirect("/verificar-correo");
+  if (!user.email_confirmed_at) redirect(withNext('/verificar-correo', safeNextPath((await headers()).get('x-pathname'))));
   return user;
 }
 

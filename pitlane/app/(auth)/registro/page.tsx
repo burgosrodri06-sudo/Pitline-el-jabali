@@ -63,7 +63,7 @@ export default function RegistroPage() {
     } catch {
       // Sin sessionStorage, verificar-correo le pide el correo al usuario.
     }
-    router.push("/verificar-correo");
+    router.push(withNext("/verificar-correo", nextPath));
   }
 
   return (
