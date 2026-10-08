@@ -45,6 +45,35 @@ ni el checkout de otros integrantes.
 
 ## Migración y capacidad
 
+### Corrección de la revisión de Andrés
+
+La migración nueva `20261008003300_align_operations_capacity_guard.sql` corrige
+la actualización administrativa simultánea de capacidad y apartado para pista.
+El caso de 5 cupos de pista + 5 web, capacidad 10/apartado 2 → capacidad 8/apartado
+0 se reproducía antes del arreglo: la actualización se aceptaba indebidamente.
+Ahora falla y conserva capacidad 10/apartado 2 y las diez ventas.
+
+`operations_slot_web_balance` concentra el cálculo web para la función pública
+de disponibilidad y el guard administrativo. El guard evalúa la capacidad y el
+apartado propuestos usando el saldo sin truncar; la vista pública mantiene su
+mínimo de cero. La función interna no tiene permisos para roles API. Las demás
+validaciones del calendario y el historial se conservan. El guard exige READ
+COMMITTED y aprovecha el bloqueo de la fila de tanda para serializarse con ventas.
+No se modifica ninguna migración anterior.
+
+Validación del arreglo: **92 pruebas aprobadas y 9 escenarios de concurrencia**.
+Incluye la reproducción exacta, cambios válidos, retenciones vigentes/vencidas,
+reservas en revisión, historial, permisos del helper y carreras web/pista contra
+ediciones de capacidad en ambos órdenes, comprobando esperas reales de bloqueo.
+También se aplicaron los archivos SQL en una base local desechable en el orden
+remoto informado por Andrés: comprobantes → operaciones → corrección. Esto no
+sustituye verificar el historial y ejecutar la validación en el Supabase real.
+
+La revisión detectó operaciones aún sin aplicar mientras comprobantes ya estaba
+registrado. Antes del despliegue, revisar ese historial y el dry-run de la CLI:
+deben aplicarse operaciones y después esta corrección. No ejecutar solamente el
+archivo correctivo ni volver a ejecutar migraciones ya registradas.
+
 `20261007182818_rodrigo_operations.sql` se creó con
 `npx supabase migration new rodrigo_operations`. Agrega cierre operativo, autor
 de créditos/finalización, idempotencia y restricciones de asistencia/pagos.

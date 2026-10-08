@@ -213,6 +213,35 @@ try {
     "15.00",
   );
   console.log("PASS: concurrent credits never exceed the amount paid.");
+  // Capacity edits must serialize with both sale channels, in either order.
+  // The competing UPDATE must see the committed ninth seat after its lock wait.
+  for (const [index, channel] of ["track", "web"].entries()) {
+    for (const editFirst of [false, true]) {
+      const minutes = 40 + index * 40 + (editFirst ? 20 : 0);
+      const slot = (await admin.query(`insert into slots(event_id,starts_at,ends_at,capacity,track_reserved_spots)
+        values($1,now()+make_interval(mins=>$2),now()+make_interval(mins=>$2+10),10,2) returning id`,
+        [f.event, minutes])).rows[0].id;
+      for (const [source, spots] of [["track", 3], ["web", 5]]) {
+        await admin.query(`insert into reservations(user_id,slot_id,package_id,spots,amount,status,channel,rules_accepted_at)
+          values($1,$2,$3,$4,15,'paid',$5,now())`, [users.pilot, slot, f.pkg, spots, source]);
+      }
+      const seller = channel === "track" ? a : web;
+      const sell = () => channel === "track"
+        ? seller.query("select operations_track_sale($1,$2,'Capacity race',$3)", [slot,f.pkg,randomUUID()])
+        : seller.query("select create_reservation($1,$2,$3::jsonb,$4,true)",
+          [slot,f.pkg,JSON.stringify([{ full_name: "Capacity race" }]),randomUUID()]);
+      const edit = () => ca.query("update slots set capacity=8,track_reserved_spots=0 where id=$1", [slot]);
+      const [, blocked] = await race(admin, editFirst ? ca : seller, editFirst ? seller : ca,
+        editFirst ? edit : sell, editFirst ? sell : edit);
+      assert.match(blocked.error?.message ?? "", editFirst ? /insufficient_capacity/ : /cupos ya reservados/);
+      const state = (await admin.query(`select capacity,track_reserved_spots,
+        (select sum(spots)::int from reservations where slot_id=s.id) sold from slots s where id=$1`, [slot])).rows[0];
+      assert.deepEqual(state, editFirst
+        ? { capacity: 8, track_reserved_spots: 0, sold: 8 }
+        : { capacity: 10, track_reserved_spots: 2, sold: 9 });
+      console.log(`PASS: ${channel} sale versus capacity edit (${editFirst ? "edit" : "sale"} first).`);
+    }
+  }
 } finally {
   await Promise.allSettled(clients.map((c) => c.end()));
   await cluster.stop();

@@ -1,5 +1,17 @@
 # Cierre de la entrega de Rodrigo
 
+## Corrección del hallazgo de capacidad de Andrés
+
+El informe `REVISION_PR14_RODRIGO.md` detectó una reducción indebida de 10 a 8
+cupos con diez vendidos. Se reprodujo con una prueba que fallaba antes del arreglo.
+La migración nueva `20261008003300_align_operations_capacity_guard.sql` comparte
+el cálculo de disponibilidad con la validación administrativa de la propuesta.
+Ahora se rechaza la reducción; pasan 92 pruebas y 9 carreras concurrentes,
+incluyendo la venta web/pista contra edición de capacidad en ambos órdenes.
+La secuencia de migraciones del remoto informada en el reporte se validó en una
+base local desechable. No se aplicó SQL al remoto ni se da por aprobada la revisión
+de Andrés: debe comprobar el nuevo commit del PR.
+
 ## Actualización tras integrar main `b35cbea`
 
 El catálogo de Andrés, las rutas de tanda/pago y la conexión del wizard de Gabriel
