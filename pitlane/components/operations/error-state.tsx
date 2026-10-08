@@ -1,20 +1,18 @@
 "use client";
-import Link from "next/link";
-import styles from "./operations.module.css";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { Alert } from "@/components/ui/feedback";
 export default function OperationsError({ reset }: { reset: () => void }) {
   return (
-    <main className={styles.shell} lang="es">
-      <h1 className={styles.title}>No pudimos cargar la información</h1>
-      <p className={styles.muted}>
+    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6" lang="es">
+      <h1 className="font-display text-3xl font-bold uppercase">No pudimos cargar la información</h1>
+      <Alert tone="danger" role="alert" className="mt-5">
         Intenta nuevamente. Si el problema continúa, contacta al administrador.
-      </p>
-      <div className={styles.fields}>
-        <button className={styles.button} onClick={reset}>
-          Reintentar
-        </button>
-        <Link className={styles.link} href="/karting/kartingrentalexperience">
+      </Alert>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button onClick={reset}>Reintentar</Button>
+        <ButtonLink variant="secondary" href="/karting/kartingrentalexperience">
           Volver a KRE
-        </Link>
+        </ButtonLink>
       </div>
     </main>
   );

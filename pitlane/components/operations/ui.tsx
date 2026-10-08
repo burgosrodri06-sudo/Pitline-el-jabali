@@ -1,45 +1,32 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UserRole } from "@/types";
-import { canAccessOperation } from "@/lib/operations/rules";
+import { PageHeader } from "@/components/ui/page-header";
 import styles from "./operations.module.css";
 export { styles };
+// Contenido de página. El piloto recibe el SiteHeader de su layout y el personal la
+// barra de Race Control (app/{staff,cobros,admin}/layout.tsx).
 export function OperationsShell({
   title,
   description,
   role = "pilot",
+  eyebrow,
   children,
 }: {
   title: string;
   description: string;
   role?: UserRole;
+  eyebrow?: string;
   children: ReactNode;
 }) {
   return (
     <main className={styles.shell} lang="es">
-      <div className={styles.top}>
-        <Link className={styles.brand} href="/karting/kartingrentalexperience">
-          PIT<span>LANE</span>
-        </Link>
-        <nav className={styles.nav} aria-label="Operación">
-          <Link href="/mis-reservas">Mis reservas</Link>
-          {canAccessOperation(role, "track") && (
-            <>
-              <Link href="/staff/check-in">Check-in</Link>
-              <Link href="/staff/venta">Venta en pista</Link>
-            </>
-          )}
-          {canAccessOperation(role, "payments") && (
-            <Link href="/cobros/verificacion">Cobros</Link>
-          )}
-          {canAccessOperation(role, "reports") && (
-            <Link href="/admin/reportes">Reportes</Link>
-          )}
-        </nav>
-      </div>
-      <p className={styles.eyebrow}>KARTING RENTAL EXPERIENCE</p>
-      <h1 className={styles.title}>{title}</h1>
-      <p className={`${styles.muted} ${styles.lead}`}>{description}</p>
+      <PageHeader
+        eyebrow={eyebrow ?? (role === "pilot" ? "Karting Rental Experience" : "Race Control")}
+        title={title}
+        description={description}
+        className="mb-8"
+      />
       {children}
     </main>
   );
