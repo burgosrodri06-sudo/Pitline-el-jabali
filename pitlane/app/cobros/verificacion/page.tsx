@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth";
 import { getPaymentsForReview } from "@/lib/operations/service";
 import { paymentAction } from "@/app/operations-actions";
 import { ActionForm } from "@/components/operations/action-form";
+import { AlertTriangle, ArrowUpRight } from "@/components/ui/icons";
+import { Badge } from "@/components/ui/status";
 import {
   dateTime,
   EmptyState,
@@ -34,7 +36,7 @@ export default async function PaymentReview({
       title="Verificación de pagos"
       description="Revisa la transferencia y su comprobante antes de habilitar el acceso a pista. Las ventas en efectivo se registran por separado."
     >
-      <nav className={styles.fields} aria-label="Estado de pagos">
+      <nav className={styles.tabs} aria-label="Estado de pagos">
         {[
           ["uploaded", "Por revisar"],
           ["approved", "Aprobados"],
@@ -44,10 +46,10 @@ export default async function PaymentReview({
           <Link
             key={value}
             aria-current={status === value ? "page" : undefined}
-            className={status === value ? styles.button : styles.link}
             href={`?status=${value}`}
           >
             {label}
+            {status === value && <span className={styles.count}>{total}</span>}
           </Link>
         ))}
       </nav>
@@ -56,13 +58,23 @@ export default async function PaymentReview({
       )}
       <div className={styles.stack}>
         {payments.map((p) => (
-          <article className={styles.card} key={p.id}>
+          <article className={`${styles.card} ${styles.payment}`} key={p.id}>
             <div className={styles.row}>
               <h2>
-                {p.reservation.code} · {p.reservation.holderName}
+                <span className={styles.code}>{p.reservation.code}</span>{" "}
+                · {p.reservation.holderName}
               </h2>
-              <StatusBadge status={p.status} />
+              <div className="flex flex-wrap gap-2">
+                {p.amount !== p.reservation.amount && (
+                  <Badge tone="warning">
+                    <AlertTriangle size={14} /> Monto distinto
+                  </Badge>
+                )}
+                <StatusBadge status={p.status} />
+              </div>
             </div>
+            <div className={styles.paymentBody}>
+            <div>
             <dl className={styles.details}>
               <dt>Tanda</dt>
               <dd>{dateTime(p.reservation.slot.startsAt)}</dd>
@@ -86,16 +98,20 @@ export default async function PaymentReview({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Abrir comprobante privado
+                <ArrowUpRight size={18} /> Abrir comprobante privado
               </a>
             ) : (
               <p className={styles.error}>No hay comprobante adjunto.</p>
             )}
             {p.rejectionReason && (
-              <p className={styles.error}>{p.rejectionReason}</p>
+              <p className={`${styles.error} mt-3`}>
+                Motivo de rechazo: {p.rejectionReason}
+              </p>
             )}
+            </div>
             {p.status === "uploaded" && (
-              <div className={styles.grid} style={{ marginTop: 20 }}>
+              <div className={styles.decision}>
+                <p className={styles.decisionTitle}>Decisión</p>
                 <ActionForm
                   action={paymentAction}
                   label="Aprobar pago"
@@ -104,7 +120,11 @@ export default async function PaymentReview({
                   <input type="hidden" name="paymentId" value={p.id} />
                   <input type="hidden" name="decision" value="approve" />
                 </ActionForm>
-                <ActionForm action={paymentAction} label="Rechazar pago">
+                <ActionForm
+                  action={paymentAction}
+                  label="Rechazar pago"
+                  variant="danger"
+                >
                   <input type="hidden" name="paymentId" value={p.id} />
                   <input type="hidden" name="decision" value="reject" />
                   <label className={styles.label}>
@@ -120,7 +140,8 @@ export default async function PaymentReview({
               </div>
             )}
             {p.status === "approved" && (
-              <div style={{ marginTop: 20 }}>
+              <div className={styles.decision}>
+                <p className={styles.decisionTitle}>Conciliación</p>
                 <ActionForm
                   action={paymentAction}
                   label="Marcar conciliado"
@@ -131,6 +152,7 @@ export default async function PaymentReview({
                 </ActionForm>
               </div>
             )}
+            </div>
           </article>
         ))}
       </div>

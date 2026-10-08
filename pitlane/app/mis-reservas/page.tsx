@@ -46,7 +46,7 @@ export default async function MyReservations({
         </Link>
       </div>
       {credits.length > 0 && (
-        <section className={`${styles.card} border-l-2 border-l-success`}>
+        <section className={styles.card} style={{ borderLeft: "2px solid var(--pl-success)" }}>
           <h2>Créditos a tu favor</h2>
           <p className={styles.metric}>
             {money(

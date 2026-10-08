@@ -85,27 +85,14 @@ export default async function CheckInPage({
             placeholder="Nombre del participante / KRE-…"
           />
         </label>
-        <button className={styles.button}>Consultar</button>
+        <button className={`${styles.button} ${styles.secondary}`}>Consultar</button>
       </form>
       {!slot ? (
         <EmptyState>No hay tandas para esta fecha.</EmptyState>
       ) : (
         <>
           <div className={styles.grid}>
-            <section className={styles.card}>
-              <div className={styles.row}>
-                <h2>{dateTime(slot.startsAt)}</h2>
-                <StatusBadge status={slot.status} />
-              </div>
-              <p className={styles.metric}>
-                {present} / {slot.capacity}
-              </p>
-              <p className={styles.muted}>
-                Participantes con check-in ·{" "}
-                {slot.closed ? "Asistencia cerrada" : "Asistencia abierta"}
-              </p>
-            </section>
-            <section className={styles.card}>
+            <section className={styles.card} style={{ borderTop: "2px solid var(--pl-red)" }}>
               <h2>Registrar llegada</h2>
               {slot.closed || finished || slot.status === "cancelled" ? (
                 <p className={styles.muted}>
@@ -115,12 +102,36 @@ export default async function CheckInPage({
                 <ActionForm
                   action={checkInAction}
                   label="Registrar grupo completo"
+                  size="lg"
                   confirm="¿Están presentes todos los participantes de esta reserva? Para entradas parciales usa la lista de participantes."
                 >
                   <input type="hidden" name="slotId" value={slot.id} />
                   <ScanInput />
                 </ActionForm>
               )}
+            </section>
+            <section className={styles.card}>
+              <div className={styles.row}>
+                <h2>{dateTime(slot.startsAt)}</h2>
+                <StatusBadge status={slot.status} />
+              </div>
+              <p className={styles.metric}>
+                {present} <span className="text-2xl text-muted">/ {slot.capacity}</span>
+              </p>
+              <div
+                className="h-1.5 overflow-hidden rounded-full bg-surface-3"
+                role="img"
+                aria-label={`${present} de ${slot.capacity} participantes con check-in`}
+              >
+                <div
+                  className="h-full bg-success transition-[width] duration-[var(--pl-dur-slow)]"
+                  style={{ width: `${slot.capacity ? Math.min(100, (present / slot.capacity) * 100) : 0}%` }}
+                />
+              </div>
+              <p className={`${styles.muted} mt-3`}>
+                Participantes con check-in ·{" "}
+                {slot.closed ? "Asistencia cerrada" : "Asistencia abierta"}
+              </p>
             </section>
           </div>
           <h2 className={styles.section}>Participantes</h2>
@@ -145,8 +156,16 @@ export default async function CheckInPage({
                     <li key={p.id} className={styles.participant}>
                       <div className={styles.row}>
                         <div>
-                          <strong>{p.fullName}</strong>
-                          <p className={styles.muted}>
+                          <strong className="text-base">{p.fullName}</strong>
+                          <p
+                            className={`text-sm ${
+                              p.attendance?.noShow
+                                ? "text-danger"
+                                : p.attendance?.checkedInAt
+                                  ? "text-success"
+                                  : "text-muted"
+                            }`}
+                          >
                             {p.attendance?.noShow
                               ? "Ausencia registrada"
                               : p.attendance?.checkedInAt
@@ -210,6 +229,7 @@ export default async function CheckInPage({
                       <ActionForm
                         action={creditAction}
                         label="Cancelar y emitir crédito"
+                        variant="danger"
                       >
                         <input
                           type="hidden"
@@ -242,7 +262,7 @@ export default async function CheckInPage({
             ))}
           </div>
           {!slot.closed && (
-            <section className={styles.card} style={{ marginTop: 24 }}>
+            <section className={`${styles.card} mt-6`}>
               <h2>Cierre de asistencia</h2>
               <p className={styles.muted}>
                 Al terminar la tanda, registra como ausentes a quienes no
@@ -252,6 +272,7 @@ export default async function CheckInPage({
                 <ActionForm
                   action={closeSlotAction}
                   label="Cerrar tanda y marcar ausencias"
+                  variant="danger"
                   confirm="¿Cerrar la asistencia de esta tanda? Ya no se podrán registrar llegadas."
                 >
                   <input type="hidden" name="slotId" value={slot.id} />

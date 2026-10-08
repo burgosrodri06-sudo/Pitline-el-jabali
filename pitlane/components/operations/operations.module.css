@@ -136,12 +136,27 @@
   opacity: 0.45;
   cursor: wait;
 }
-.secondary {
+.button[data-variant="danger"] {
+  background: rgb(255 107 107 / 0.1);
+  border-color: rgb(255 107 107 / 0.6);
+  color: var(--pl-danger, #ff6b6b);
+}
+.button[data-variant="danger"]:hover {
+  background: rgb(255 107 107 / 0.2);
+}
+.button[data-size="lg"] {
+  width: 100%;
+  min-height: 56px;
+  font-size: 17px;
+}
+.secondary,
+.button[data-variant="secondary"] {
   background: var(--ops-surface-2);
   border-color: var(--ops-border-strong);
   color: var(--ops-text);
 }
-.secondary:hover {
+.secondary:hover,
+.button[data-variant="secondary"]:hover {
   background: var(--pl-surface-3, #26262a);
   border-color: var(--ops-muted);
 }
@@ -316,6 +331,87 @@
   .error,
   .success {
     animation: none;
+  }
+}
+/* Pestañas de estado (cobros) */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding: 4px;
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius);
+  background: var(--ops-surface);
+  overflow-x: auto;
+}
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--pl-radius-sm, 2px);
+  color: var(--ops-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--ops-fast),
+    color var(--ops-fast);
+}
+.tabs a:hover {
+  color: var(--ops-text);
+}
+.tabs a[aria-current] {
+  background: var(--ops-surface-2);
+  color: var(--ops-text);
+  box-shadow: inset 0 -2px var(--ops-red);
+}
+.count {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--ops-red);
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+/* Tarjeta de pago: datos a la izquierda, decisión a la derecha */
+.payment > .row h2 {
+  margin: 0;
+}
+.paymentBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  gap: 24px;
+  align-items: start;
+}
+.paymentBody > :only-child {
+  grid-column: 1 / -1;
+}
+.decision {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius);
+  background: var(--ops-bg);
+}
+.decisionTitle {
+  margin: 0;
+  color: var(--ops-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media (max-width: 860px) {
+  .paymentBody {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 }
 @media (max-width: 640px) {
