@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
   Flag,
   CalendarDays,
   Clock3,
@@ -66,21 +65,6 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
       <div className={cx("demo-banner")}>
         KARTING RENTAL EXPERIENCE · Fechas y cupos publicados por ACES.
       </div>
-      <header className={cx("navbar wrap")}>
-        <Link href="/karting/kartingrentalexperience" className={cx("brand")}>
-          <Flag fill="currentColor" size={27} aria-hidden="true" />
-          <span>
-            PITLANE<small>EL JABALÍ · KARTING</small>
-          </span>
-        </Link>
-        <nav aria-label="Navegación principal">
-          <a href="#experiencia">La experiencia</a>
-          <a href="#paquetes">Paquetes</a>
-          <a href="#calendario">
-            Calendario <ArrowUpRight size={14} />
-          </a>
-        </nav>
-      </header>
       <main id="contenido">
         <section id="experiencia" className={cx("hero wrap")}>
           <div className={cx("hero-copy")}>

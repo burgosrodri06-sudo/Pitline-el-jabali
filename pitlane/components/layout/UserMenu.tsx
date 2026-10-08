@@ -60,7 +60,9 @@ export default function UserMenu() {
         </Link>
       )}
       <button type="button" onClick={handleSignOut} className={linkClass}>
-        Cerrar sesión
+        {/* Texto corto en móvil para que el header quepa en una línea a 360 px. */}
+        <span className="sm:hidden">Salir</span>
+        <span className="hidden sm:inline">Cerrar sesión</span>
       </button>
     </div>
   );
@@ -73,11 +75,12 @@ function GuestLinks({ linkClass }: { linkClass: string }) {
   return (
     <div className="flex items-center gap-4">
       <Link href={withNext("/login", nextPath)} className={linkClass}>
-        Iniciar sesión
+        <span className="sm:hidden">Entrar</span>
+        <span className="hidden sm:inline">Iniciar sesión</span>
       </Link>
       <Link
         href={withNext("/registro", nextPath)}
-        className="rounded-md bg-[#C8102E] px-3 py-2 text-sm font-semibold text-white hover:bg-[#A50D26]"
+        className="whitespace-nowrap rounded-md bg-[#C8102E] px-3 py-2 text-sm font-semibold text-white hover:bg-[#A50D26]"
       >
         Crear cuenta
       </Link>
