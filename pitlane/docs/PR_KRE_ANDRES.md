@@ -1,5 +1,7 @@
 # feat: landing KRE y calendario integrado con reservas
 
+> Descripción histórica, no usar como PR nuevo. El catálogo real de Andrés ya está integrado; ver [estado final](FINAL_INTEGRATION_STATUS.md).
+
 La interfaz pública permite consultar fechas, horarios y paquetes antes de
 entrar al flujo de reservas. Agrega `/karting/kartingrentalexperience` y los
 componentes EventCard, SlotCard y PackageCard con estados de disponibilidad.

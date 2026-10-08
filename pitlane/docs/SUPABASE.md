@@ -1,5 +1,7 @@
 # Supabase en PitLane
 
+> Para la integración final, prevalece [FINAL_INTEGRATION_STATUS.md](FINAL_INTEGRATION_STATUS.md): historial remoto pendiente de verificar, diez migraciones, cupos vendidos conservados tras asistencia y gate de staging. La carga validada de comprobantes incorpora una excepción server-only de service-role que requiere coordinación; nunca una clave pública ni un cambio de RLS para permitir subidas sin validar. Los comandos remotos de esta guía no se ejecutaron durante integración.
+
 Guía corta para que todo el equipo use Supabase igual. Todo se corre dentro de `pitlane/`.
 
 ## 1. Configuración local
@@ -99,7 +101,7 @@ const { user, profile } = await requireAdmin(); // igual que requireRole("kre_ad
 ```ts
 import { getHomeForRole } from "@/lib/auth/home"; // también se exporta desde "@/lib/auth" (solo servidor)
 
-getHomeForRole("pilot");    // /karting/kartingrentalexperience/reservar
+getHomeForRole("pilot");    // /reservar
 getHomeForRole("staff");    // /staff/check-in
 getHomeForRole("payments"); // /cobros/verificacion
 getHomeForRole("kre_admin"); // /admin/eventos (igual system_admin)

@@ -1,4 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PitLane · El Jabalí
+
+Aplicación Next.js del equipo: catálogo KRE, reservas atómicas, comprobantes privados y operación de pista/pagos/reportes.
+
+Estado actual, roles, orden de migraciones, validaciones y checklist de staging: [docs/FINAL_INTEGRATION_STATUS.md](docs/FINAL_INTEGRATION_STATUS.md).
+
+Node 24. Desde `pitlane/`: `npm ci --ignore-scripts`, configurar únicamente las variables autorizadas del entorno y `npm run dev`. Las reservas/comprobantes permanecen bloqueados por defecto; no usar flags de staging para habilitar producción. No versionar secretos ni aplicar migraciones a un proyecto compartido sin revisar su historial.
+
+Validación: `npm test`, `npm run lint`, `npx tsc --noEmit`, `npm run build`. Concurrencia local desechable: `npm run test:reservations:local` y `npm run test:operations:concurrency`. Visual de operations con fixtures: `npm run test:operations:visual` (Edge).
+
+La guía genérica de Next siguiente se conserva como referencia; no sustituye el procedimiento de integración del equipo.
 
 ## Getting Started
 

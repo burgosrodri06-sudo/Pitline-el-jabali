@@ -1,5 +1,7 @@
 # Bloque 4 — wizard con motor real
 
+> Registro del Bloque 4. Actualmente KRE usa catálogo real, la carga privada de comprobantes está integrada y operations está incorporado en la rama final. Ver [estado final](FINAL_INTEGRATION_STATUS.md); los pendientes descritos abajo corresponden a la fecha de este bloque.
+
 Rama: feature/reservation-wizard-integration, creada desde main c6c5047 con
 working tree limpio. No se modifican migraciones ni se aplica SQL remoto.
 

@@ -1,5 +1,7 @@
 # Landing y calendario KRE — Andrés
 
+> Documento histórico del prototipo. El catálogo actual es real y sus enlaces usan UUID hacia `/reservar`; los mocks descritos abajo ya no alimentan la landing. Ver [estado final](FINAL_INTEGRATION_STATUS.md).
+
 Ruta: `/karting/kartingrentalexperience`, dentro de la aplicación `pitlane`.
 
 ## Entrega

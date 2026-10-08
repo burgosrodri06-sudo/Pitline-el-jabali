@@ -1,5 +1,7 @@
 # Bloque 5 — primera entrega privada (solo pruebas)
 
+> Registro histórico del bloque. PR #15/#16 ya están integrados en main; operations y sus migraciones están incorporados en la rama de integración final. Los tests actuales no dependen de una rama remota. Consultar [estado final](FINAL_INTEGRATION_STATUS.md) para validaciones, parches y pendientes vigentes.
+
 Rama `feature/payment-receipt-upload`, derivada de `feature/reservation-wizard-integration` en `5bc74cc`. Depende del PR #15, todavía abierto al iniciar este bloque. Mientras no se integre, cualquier PR de este bloque debe apuntar a esa rama, **no a main**. Después de integrarlo, actualizar la base y comprobar que el diff hacia main contiene solo Bloque 5. No se publicó este trabajo ni se ejecutó SQL remoto.
 
 ## Contratos y alcance

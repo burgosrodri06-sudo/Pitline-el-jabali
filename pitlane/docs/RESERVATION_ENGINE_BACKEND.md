@@ -1,5 +1,7 @@
 # Backend de reservas — contrato compartido, Bloque 3.2
 
+> Contrato e historial del Bloque 3.2. El wizard/comprobantes ya están conectados y operations actualiza la semántica de capacidad; ver [estado final](FINAL_INTEGRATION_STATUS.md). Los límites de alcance originales no describen la integración actual.
+
 La integración posterior del Bloque 4 se documenta en
 [RESERVATION_WIZARD_INTEGRATION.md](RESERVATION_WIZARD_INTEGRATION.md).
 Las menciones a wizard desconectado describen el alcance histórico de 3.2;
