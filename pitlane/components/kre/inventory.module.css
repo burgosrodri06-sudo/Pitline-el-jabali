@@ -141,7 +141,7 @@
 }
 .root :global(.slot-list) {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
   gap: 12px;
 }
 .root :global(.slot) {
@@ -192,4 +192,76 @@
   .root select {
     width: 100%;
   }
+}
+
+/* Chips de fecha del calendario público */
+.root nav a[href] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--pl-border-strong);
+  border-radius: var(--pl-radius);
+  background: var(--pl-surface);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: capitalize;
+  transition:
+    border-color var(--pl-dur-fast),
+    background-color var(--pl-dur-fast);
+}
+.root nav a[href]:hover {
+  border-color: var(--pl-muted);
+}
+.root nav a[href][aria-current] {
+  background: var(--pl-red);
+  border-color: var(--pl-red);
+  color: #fff;
+}
+.root h2::first-letter {
+  text-transform: uppercase;
+}
+.root :global(.slot) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color var(--pl-dur-fast);
+}
+.root :global(.slot):hover {
+  border-color: var(--pl-border-strong);
+}
+.root :global(.slot) strong {
+  font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+}
+.root :global(.slot) p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+.root :global(.slot) :global(.cta),
+.root :global(.slot) button {
+  margin-top: 10px;
+  text-align: center;
+  background: transparent;
+  border: 1px solid var(--pl-border-strong);
+  color: var(--pl-text);
+}
+.root :global(.slot) :global(.cta):hover {
+  background: var(--pl-red);
+  border-color: var(--pl-red);
+}
+.root :global(.grid) article h2 {
+  font-size: 34px;
+  font-variant-numeric: tabular-nums;
+}
+.root button:global(.refresh) {
+  margin-right: 12px;
+  background: var(--pl-surface-2);
+  border: 1px solid var(--pl-border-strong);
+  color: var(--pl-text);
+}
+.root button:global(.refresh):hover {
+  border-color: var(--pl-muted);
 }

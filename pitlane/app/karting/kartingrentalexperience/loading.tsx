@@ -1,10 +1,4 @@
-import { cx } from "@/components/kre/styles";
+import { PageSkeleton } from "@/components/ui/feedback";
 export default function Loading() {
-  return (
-    <main className={cx("root wrap section")} aria-busy="true">
-      <p role="status">Cargando calendario y paquetes…</p>
-      <div className={cx("root skeleton")} />
-      <div className={cx("root skeleton")} />
-    </main>
-  );
+  return <PageSkeleton label="Cargando calendario y paquetes…" />;
 }

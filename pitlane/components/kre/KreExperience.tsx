@@ -83,9 +83,14 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
               <br />
               Descubre la experiencia, encuentra tu fecha y comparte la pista.
             </p>
-            <a href="#calendario" className={cx("button")}>
-              Explorar fechas <ArrowRight size={19} />
-            </a>
+            <div className={cx("hero-actions")}>
+              <Link href="/reservar" className={cx("button button-lg")}>
+                Reservar <ArrowRight size={19} />
+              </Link>
+              <a href="#calendario" className={cx("button-ghost")}>
+                <CalendarDays size={18} /> Explorar fechas
+              </a>
+            </div>
             <div className={cx("hero-location")}>
               <MapPin size={16} /> Autódromo Internacional El Jabalí
             </div>

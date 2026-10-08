@@ -12,7 +12,11 @@ export function RefreshAvailability() {
   }, [router]);
   return (
     <p>
-      <button disabled={pending} onClick={() => start(() => router.refresh())}>
+      <button
+        disabled={pending}
+        onClick={() => start(() => router.refresh())}
+        className="refresh"
+      >
         {pending ? "Actualizando…" : "Actualizar cupos"}
       </button>{" "}
       <span aria-live="polite">

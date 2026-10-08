@@ -138,12 +138,12 @@ export default function UserMenu() {
 function GuestLinks() {
   const nextPath = safeNextPath(useSearchParams().get("next"));
   return (
-    <div className="flex items-center gap-4 sm:gap-6">
+    <div className="flex items-center gap-3 sm:gap-6">
       <Link href={withNext("/login", nextPath)} className={headerLinkClass}>
         <span className="sm:hidden">Entrar</span>
         <span className="hidden sm:inline">Iniciar sesión</span>
       </Link>
-      <Link href={withNext("/registro", nextPath)} className={buttonClass({ className: "min-h-10 px-3" })}>
+      <Link href={withNext("/registro", nextPath)} className={buttonClass({ className: "min-h-10 whitespace-nowrap px-3" })}>
         Crear cuenta
       </Link>
     </div>
