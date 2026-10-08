@@ -17,6 +17,7 @@ const fixture = pathToFileURL(
 ).href;
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === '@/components/layout/UserMenu') return { url: 'ops-test:user-menu', shortCircuit: true };
     if (specifier === "@/lib/operations/service")
       return { url: fixture, shortCircuit: true };
     if (specifier === "@/lib/auth")
@@ -40,6 +41,7 @@ registerHooks({
     return next(specifier, context);
   },
   load(url, context, next) {
+    if (url === 'ops-test:user-menu') return { format: 'module', source: 'export default function UserMenu(){return null}', shortCircuit: true };
     if (url === "ops-test:auth")
       return {
         format: "module",

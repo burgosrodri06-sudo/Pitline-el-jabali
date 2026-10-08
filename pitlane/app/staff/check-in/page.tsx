@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth";
+export const metadata = { title: 'Control de pista · PitLane' };
 import {
   getOperationSlots,
   getSlotAttendance,

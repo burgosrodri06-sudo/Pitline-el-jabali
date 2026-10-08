@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import UserMenu from '@/components/layout/UserMenu';
 import { useEffect, useRef, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import type { CreateReservationInput, ReservationReceipt, ReservationParticipantInput } from "@/domain/reservations/types";
 import { PARTICIPANT_NAME_MAX_LENGTH, validateReservationPreparation } from "@/domain/reservations/preparation";
@@ -108,6 +109,10 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
         <div className={styles.brand}>PIT<span>LANE</span><span className={styles.brandSlash} aria-hidden="true">{"//"}</span></div>
         <div className={styles.venue}>EL JABALÍ<span>Autódromo Internacional · El Salvador</span></div>
       </header>
+      <nav className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-4 px-5 py-3" aria-label="Cuenta y calendario">
+        <Link href="/karting/kartingrentalexperience">Calendario KRE</Link>
+        <UserMenu />
+      </nav>
 
       <main className={`mx-auto w-full max-w-7xl px-5 py-10 sm:px-10 sm:py-14 ${styles.main}`}>
         <div className={styles.hero}>
@@ -197,7 +202,7 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
 
             <div className={styles.actions}>{step > 0 && <button type="button" className={styles.backButton} onClick={() => goToStep(step - 1)}>← Volver</button>}<button type={step === 3 ? "submit" : "button"} form={step === 3 ? "reservation-preparation" : undefined} aria-describedby={step === 3 ? "preparation-help" : undefined} className={styles.primaryButton} disabled={(!canContinue && !uncertain) || sending || Boolean(receipt) || (step === 3 && (!bookingEnabled || !authenticated))} onClick={() => { if (canContinue && step < 3) goToStep(step + 1); }}>{step === 3 ? (sending ? "Enviando…" : uncertain ? "Reintentar el mismo apartado" : "Crear apartado pendiente de pago") : `Continuar a ${steps[step + 1].toLowerCase()}`}<span aria-hidden="true">→</span></button></div>
             {!canContinue && step < 3 && <p className={styles.footnote}>Seleccioná {step === 0 ? "una fecha" : step === 1 ? "una tanda disponible" : "una experiencia disponible"} para continuar.</p>}
-            {authenticated && !verified && !receipt && <p role="status">Confirmá tu correo antes de reservar. <Link href="/verificar-correo" target="_blank" rel="noopener noreferrer">Abrir verificación en otra pestaña</Link>; después reintentá aquí para conservar tus datos.</p>}
+            {authenticated && !verified && !receipt && <p role="status">Confirmá tu correo antes de reservar. <Link href={bookingLoginHref({ dateId, slotId, packageId }).replace('/login?', '/verificar-correo?')} target="_blank" rel="noopener noreferrer">Abrir verificación en otra pestaña</Link>; después reintentá aquí para conservar tus datos.</p>}
             {error && <div ref={noticeRef} tabIndex={-1} role="alert" className={styles.preparationNotice}><p>{reservationMessages[error] ?? reservationMessages.reservation_unavailable}</p>{error === 'authentication_required' && <Link href={bookingLoginHref({ dateId, slotId, packageId })}>Volver a iniciar sesión</Link>}</div>}
             {receipt && <div ref={noticeRef} tabIndex={-1} role="status" className={styles.preparationNotice}>
               <strong>{receipt.status === 'pending_payment' ? 'Apartado pendiente de pago' : 'Estado de tu reserva'}</strong>

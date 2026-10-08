@@ -10,14 +10,14 @@ import {
 import { checkDatabaseError } from "./inventory.service";
 export async function getPackages(
   admin = false,
-  date = localToday(),
+  date: string | null = localToday(),
 ): Promise<PackageRow[]> {
   if (admin) await requireAdmin();
   const db = await createClient();
   let query = db.from("packages").select("*").order("price");
-  if (!admin)
+  if (!admin) query = query.eq('active', true);
+  if (!admin && date)
     query = query
-      .eq("active", true)
       .or("valid_from.is.null,valid_from.lte." + date)
       .or("valid_to.is.null,valid_to.gte." + date);
   const { data, error } = await query;

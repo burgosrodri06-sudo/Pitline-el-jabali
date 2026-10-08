@@ -1,6 +1,7 @@
 import Link from "next/link";
 import QRCode from "qrcode";
 import type { OperationReservation } from "@/lib/operations/service";
+import { operationTime } from '@/lib/operations/service';
 import { canDisplayQr } from "@/lib/operations/rules";
 import { dateTime, money, StatusBadge, styles, time } from "./ui";
 export async function ReservationCard({
@@ -10,6 +11,7 @@ export async function ReservationCard({
   reservation: OperationReservation;
   track?: boolean;
 }) {
+  const expiredHold = r.status === 'pending_payment' && !!r.expiresAt && Date.parse(r.expiresAt) <= await operationTime();
   const hasAccess =
     canDisplayQr(r.status) &&
     r.slot.status !== "cancelled" &&
@@ -100,7 +102,9 @@ export async function ReservationCard({
           )}
         </>
       )}
-      {!track && r.status === "pending_payment" && (
+      {expiredHold && <p className={styles.muted}>El plazo del apartado venció. No está confirmado.</p>}
+      {!track && r.status === 'pending_payment' && r.payments.length > 0 && <p className={styles.muted}>El reenvío de comprobantes aún no está habilitado. Contacta al equipo para revisar el rechazo.</p>}
+      {!track && r.status === "pending_payment" && !expiredHold && r.payments.length === 0 && (
         <Link className={styles.button} href={`/reservas/${r.id}/pago`}>
           Continuar al pago
         </Link>

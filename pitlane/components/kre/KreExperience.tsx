@@ -13,10 +13,11 @@ import {
   ChevronRight,
 } from "./Icons";
 import type { Catalog } from "@/domain/events/types";
-import { bookingHref, dateLabel, timeLabel } from "@/lib/catalog";
+import { bookingHref, dateLabel, timeLabel, packageValidOn } from "@/lib/catalog";
 import { EventCard } from "./EventCard";
 import { SlotCard } from "./SlotCard";
 import { PackageCard } from "./PackageCard";
+import UserMenu from '@/components/layout/UserMenu';
 export function KreExperience({ catalog }: { catalog: Catalog }) {
   const initialMonth =
     catalog.events[0]?.date.slice(0, 7) ??
@@ -34,10 +35,12 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
   );
   const [slotId, setSlotId] = useState<string>();
   const [packageId, setPackageId] = useState<string>();
-  const event = catalog.events.find((e) => e.date === date);
+  const [eventId, setEventId] = useState<string>();
+  const dateEvents = catalog.events.filter((e) => e.date === date);
+  const event = dateEvents.find(e => e.id === eventId) ?? dateEvents[0];
   const slots = catalog.slots.filter((s) => s.eventId === event?.id);
   const slot = slots.find((s) => s.id === slotId);
-  const pack = catalog.packages.find((p) => p.id === packageId);
+  const pack = catalog.packages.find((p) => p.id === packageId && packageValidOn(p, date) && p.eligibility === 'none');
   const [year, mon] = month.split("-").map(Number);
   const days = new Date(Date.UTC(year, mon, 0)).getUTCDate();
   const offset = (new Date(Date.UTC(year, mon - 1, 1)).getUTCDay() + 6) % 7;
@@ -45,6 +48,8 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
   function chooseDate(value: string) {
     setDate(value);
     setSlotId(undefined);
+    setPackageId(undefined);
+    setEventId(undefined);
   }
   function changeMonth(delta: number) {
     const next = new Date(Date.UTC(year, mon - 1 + delta, 1))
@@ -81,6 +86,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
           </a>
         </nav>
       </header>
+      <div className={cx('wrap')}><UserMenu /></div>
       <main id="contenido">
         <section id="experiencia" className={cx("hero wrap")}>
           <div className={cx("hero-copy")}>
@@ -223,7 +229,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
                 </>
               </div>
               <p className={cx("legend")}>
-                <span className={cx("dot")} /> Fecha con evento de demostración
+                <span className={cx("dot")} /> Fecha con evento publicado
               </p>
               <div className={cx("events-list")}>
                 {monthEvents.length ? (
@@ -232,7 +238,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
                       key={e.id}
                       event={e}
                       selected={event?.id === e.id}
-                      onSelect={() => chooseDate(e.date)}
+                      onSelect={() => { chooseDate(e.date); setEventId(e.id); }}
                     />
                   ))
                 ) : (
@@ -311,7 +317,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
                 {canContinue && event ? (
                   <Link
                     className={cx("button")}
-                    href={bookingHref(event.id, slotId, packageId)}
+                    href={bookingHref(event.id, slotId, pack?.id)}
                   >
                     Continuar a reservar <ArrowRight size={18} />
                   </Link>
@@ -340,7 +346,7 @@ export function KreExperience({ catalog }: { catalog: Catalog }) {
             </div>
             <div className={cx("packages-grid")}>
               {catalog.packages
-                .filter((p) => p.active)
+                .filter((p) => packageValidOn(p, date))
                 .map((p) => (
                   <PackageCard
                     key={p.id}

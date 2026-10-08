@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import styles from "./inventory.module.css";
+import UserMenu from '@/components/layout/UserMenu';
 export function InventoryShell({
   children,
   admin = false,
@@ -22,10 +23,10 @@ export function InventoryShell({
             <>
               <Link href="/admin/eventos">Fechas y tandas</Link>
               <Link href="/admin/paquetes">Paquetes</Link>
+              <Link href="/admin/reportes">Reportes</Link>
             </>
-          ) : (
-            <Link href="/login">Iniciar sesión</Link>
-          )}
+          ) : null}
+          <UserMenu />
         </nav>
       </header>
       <main>{children}</main>

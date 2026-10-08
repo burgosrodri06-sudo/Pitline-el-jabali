@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { UserRole } from "@/types";
 import { canAccessOperation } from "@/lib/operations/rules";
 import styles from "./operations.module.css";
+import UserMenu from '@/components/layout/UserMenu';
 export { styles };
 export function OperationsShell({
   title,
@@ -23,6 +24,8 @@ export function OperationsShell({
         </Link>
         <nav className={styles.nav} aria-label="Operación">
           <Link href="/mis-reservas">Mis reservas</Link>
+          <Link href="/reservar">Reservar</Link>
+          {(role === 'kre_admin' || role === 'system_admin') && <Link href="/admin/eventos">Calendario KRE</Link>}
           {canAccessOperation(role, "track") && (
             <>
               <Link href="/staff/check-in">Check-in</Link>
@@ -37,6 +40,7 @@ export function OperationsShell({
           )}
         </nav>
       </div>
+      <UserMenu />
       <p className={styles.eyebrow}>KARTING RENTAL EXPERIENCE</p>
       <h1 className={styles.title}>{title}</h1>
       <p className={`${styles.muted} ${styles.lead}`}>{description}</p>

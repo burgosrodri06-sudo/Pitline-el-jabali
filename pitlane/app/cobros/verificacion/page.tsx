@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const metadata = { title: 'Verificación de pagos · PitLane' };
 import { requireRole } from "@/lib/auth";
 import { getPaymentsForReview } from "@/lib/operations/service";
 import { paymentAction } from "@/app/operations-actions";

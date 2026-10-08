@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useState } from 'react';
+import Link from 'next/link';
 
 const messages: Record<string, string> = {
   receipt_invalid_input: 'Revisá la referencia y los cuatro dígitos antes de enviar.',
@@ -53,7 +54,7 @@ export default function ReceiptForm({ reservationId }: { reservationId: string }
       setMessage('No pudimos verificar el resultado. Reintentá con los mismos datos: no se duplicará el pago. No considerés la reserva confirmada.');
     } finally { busy.current = false; setPending(false); }
   }
-  if (submitted) return <p role="status">Comprobante enviado para revisión. El pago no está aprobado y la reserva no está confirmada.</p>;
+  if (submitted) return <div role="status"><p>Comprobante enviado para revisión. El pago no está aprobado y la reserva no está confirmada.</p><Link href="/mis-reservas">Consultar estado en Mis reservas</Link></div>;
   return <form onSubmit={send} className="space-y-4">
     <p>Propuesta para pruebas: JPEG/PNG, máximo 5 MiB. Solo primera entrega; reenvíos todavía no habilitados.</p>
     <fieldset disabled={pending || uncertain} className="space-y-4">

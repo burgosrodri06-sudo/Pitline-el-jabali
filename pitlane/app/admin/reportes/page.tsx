@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth";
+export const metadata = { title: 'Reportes de operación · PitLane' };
 import { getPackages, getReports, localToday } from "@/lib/operations/service";
 import { creditAction } from "@/app/operations-actions";
 import { ActionForm } from "@/components/operations/action-form";

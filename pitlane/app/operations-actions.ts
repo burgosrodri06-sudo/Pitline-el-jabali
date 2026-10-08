@@ -27,6 +27,8 @@ async function perform(work: () => Promise<ActionState>): Promise<ActionState> {
       "/staff/venta",
       "/admin/reportes",
       "/karting/kartingrentalexperience/reservar",
+      "/karting/kartingrentalexperience",
+      "/reservar",
     ])
       revalidatePath(path);
     revalidatePath("/reservar/[slotId]", "page");

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+export const metadata = { title: 'Venta en pista · PitLane' };
 import { requireRole } from "@/lib/auth";
 import {
   getOperationSlots,

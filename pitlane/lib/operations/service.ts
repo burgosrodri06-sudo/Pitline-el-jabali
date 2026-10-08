@@ -143,6 +143,7 @@ type ReservationRow = {
   qr_token: string;
   created_at: string;
   channel: string;
+  expires_at: string | null;
   slot: SlotRow;
   package: { name: string };
   holder: { full_name: string | null } | null;
@@ -152,7 +153,7 @@ type ReservationRow = {
 
 const slotColumns =
   "id,starts_at,ends_at,capacity,status,event:events(date,status),operation_slot_closures(closed_at)";
-const reservationColumns = `id,code,user_id,slot_id,package_id,amount,spots,status,qr_token,created_at,channel,slot:slots!inner(${slotColumns}),package:packages(name),holder:profiles!reservations_user_id_fkey(full_name),reservation_participants(id,full_name,is_holder,first_ride_participant_id,attendance!attendance_participant_id_fkey(*)),payments(*)`;
+const reservationColumns = `id,code,user_id,slot_id,package_id,amount,spots,status,qr_token,created_at,channel,expires_at,slot:slots!inner(${slotColumns}),package:packages(name),holder:profiles!reservations_user_id_fkey(full_name),reservation_participants(id,full_name,is_holder,first_ride_participant_id,attendance!attendance_participant_id_fkey(*)),payments(*)`;
 function paymentDto(p: PaymentRow): Payment {
   return {
     id: p.id,
@@ -207,6 +208,7 @@ function reservationDto(r: ReservationRow) {
     qrToken: r.qr_token,
     createdAt: r.created_at,
     channel: r.channel,
+    expiresAt: r.expires_at,
     slot: slotDto(r.slot),
     packageName: r.package.name,
     holderName: r.holder?.full_name ?? "Venta en pista",

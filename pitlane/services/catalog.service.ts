@@ -6,7 +6,7 @@ import { getPackages } from "./packages.service";
 export async function getLiveCatalog(): Promise<Catalog> {
   const [events, packages] = await Promise.all([
     getPublishedEvents(),
-    getPackages(),
+    getPackages(false, null),
   ]);
   const slots = (
     await Promise.all(events.map((e) => getEventSlots(e.id)))
@@ -38,6 +38,9 @@ export async function getLiveCatalog(): Promise<Catalog> {
       sessionsPerPerson: 1,
       minutesPerSession: p.duration_minutes,
       active: p.active,
+      eligibility: p.eligibility,
+      validFrom: p.valid_from,
+      validTo: p.valid_to,
     })),
   };
 }

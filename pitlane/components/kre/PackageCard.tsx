@@ -23,7 +23,7 @@ export function PackageCard({
         {new Intl.NumberFormat("es-SV", {
           style: "currency",
           currency: "USD",
-          maximumFractionDigits: 0,
+          minimumFractionDigits: 2,
         }).format(item.priceCents / 100)}
         <span> / paquete</span>
       </p>
@@ -38,11 +38,11 @@ export function PackageCard({
       </p>
       <button
         className={cx("button secondary")}
-        disabled={!item.active}
+        disabled={!item.active || item.eligibility !== 'none'}
         aria-pressed={selected}
         onClick={() => onSelect(item.id)}
       >
-        {selected ? "Paquete seleccionado" : "Elegir paquete"}
+        {item.eligibility !== 'none' ? 'Disponible en pista tras la primera vuelta' : selected ? "Paquete seleccionado" : "Elegir paquete"}
         <ArrowUpRight size={17} aria-hidden="true" />
       </button>
     </article>

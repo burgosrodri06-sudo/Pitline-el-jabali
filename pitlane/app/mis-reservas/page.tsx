@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const metadata = { title: 'Mis reservas · PitLane' };
 import {
   getMyCredits,
   getMyReservations,
@@ -27,6 +28,7 @@ export default async function MyReservations({
   const upcoming = reservations.filter(
     (r) =>
       Date.parse(r.slot.endsAt) >= now &&
+      !(r.status === 'pending_payment' && r.expiresAt && Date.parse(r.expiresAt) <= now) &&
       !["cancelled", "expired", "no_show"].includes(r.status),
   );
   const history = reservations.filter((r) => !upcoming.includes(r));

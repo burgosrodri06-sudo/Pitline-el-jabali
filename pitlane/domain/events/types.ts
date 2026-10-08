@@ -21,6 +21,9 @@ export interface Package {
   sessionsPerPerson: number;
   minutesPerSession: number;
   active: boolean;
+  eligibility: 'none' | 'requires_first_ride';
+  validFrom: string | null;
+  validTo: string | null;
 }
 export interface Catalog {
   events: KartingEvent[];

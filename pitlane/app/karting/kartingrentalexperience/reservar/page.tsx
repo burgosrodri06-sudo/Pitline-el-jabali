@@ -5,6 +5,7 @@ import { getPackages } from "@/services/packages.service";
 import { localToday, timeInSalvador } from "@/domain/events/inventory";
 import { InventoryShell } from "@/components/kre/InventoryShell";
 import { RefreshAvailability } from "@/components/kre/RefreshAvailability";
+import { bookingHref } from '@/lib/catalog';
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Calendario KRE | PitLane",
@@ -106,7 +107,7 @@ export default async function Calendar({
                     {selectable ? " · " + slot.available_spots + " cupos" : ""}
                   </p>
                   {selectable ? (
-                    <Link className="cta" href={"/reservar/" + slot.id}>
+                    <Link className="cta" href={bookingHref(event.id, slot.id)}>
                       Seleccionar tanda
                     </Link>
                   ) : (

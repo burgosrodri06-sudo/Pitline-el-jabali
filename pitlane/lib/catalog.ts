@@ -1,4 +1,7 @@
 // Stable Spanish labels avoid ICU differences between server and browser.
+export function packageValidOn(item: { active: boolean; validFrom: string | null; validTo: string | null }, date: string) {
+  return item.active && (!item.validFrom || item.validFrom <= date) && (!item.validTo || item.validTo >= date);
+}
 export function dateLabel(
   date: string,
   options: Intl.DateTimeFormatOptions = {
@@ -62,6 +65,6 @@ export function bookingHref(
   if (slotId) q.set("tanda", slotId);
   if (packageId) q.set("paquete", packageId);
   return slotId
-    ? `/reservar/${slotId}?${q}`
+    ? `/reservar?${q}`
     : "/karting/kartingrentalexperience/reservar";
 }
