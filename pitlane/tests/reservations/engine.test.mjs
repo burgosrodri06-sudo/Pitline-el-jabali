@@ -100,7 +100,7 @@ test("capacity follows main's status semantics, including attended/no_show", asy
     const ids = await fixture(db, { capacity: 1 });
     const row = (await asUser(db, ids.user, () => reserve(db, ids))).rows[0].reservation;
     await db.query("update public.reservations set status=$1 where id=$2", [status, row.id]);
-    if (["payment_review", "paid"].includes(status)) await assert.rejects(asUser(db, ids.other, () => reserve(db, ids)), /insufficient_capacity/);
+    if (["payment_review", "paid", "attended", "no_show"].includes(status)) await assert.rejects(asUser(db, ids.other, () => reserve(db, ids)), /insufficient_capacity/);
     else await asUser(db, ids.other, () => reserve(db, ids));
   }
 });

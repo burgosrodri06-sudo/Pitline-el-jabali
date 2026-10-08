@@ -23,16 +23,18 @@ esa misma instancia para llamar a `register({ code, eventDate, slotId })`.
   también `holderName` y `seats`.
 - `already_registered`: devuelve la primera marcación, conserva su hora y no
   consulta de nuevo el reloj ni agrega otro registro.
-- `rejected`: devuelve `unknown_code`, `reservation_not_confirmed`, `wrong_date`
+- `rejected`: devuelve `unknown_code`, `reservation_not_paid`, `wrong_date`
   o `wrong_slot`. No modifica las marcaciones.
 
 El orden de validación es código, estado, fecha y tanda, seguido de asistencia
 previa. Una reserva ya marcada tampoco se acepta en una tanda incorrecta.
 La comparación de códigos es exacta, sin convertir mayúsculas ni quitar espacios.
 
-**Regla provisional pendiente de validación:** solo `confirmed` habilita check-in.
-`pending`, `in_review`, `cancelled` y `expired` se rechazan. No se deduce el estado
-del pago ni se modifica la reserva original.
+Los estados se alinearon con el plan full-stack: solo `paid` permite una marcación
+nueva. `attended` únicamente devuelve una marcación ya existente (reintento).
+`pending_payment`, `payment_review`, `cancelled`, `expired` y `no_show` se rechazan.
+El rechazo se llama `reservation_not_paid`. No se deduce el estado del pago ni se
+modifica la reserva original. Esto sigue siendo un prototipo local de pruebas.
 
 ## Propuesta de datos del módulo de reservas
 
@@ -47,7 +49,7 @@ ni un cambio al modelo del flujo de reservas existente.
 | `seats` | Entero positivo con los cupos del grupo. |
 | `eventDate` | Fecha operativa `YYYY-MM-DD` en El Salvador; se compara como texto, no como fecha UTC. |
 | `slotId` | Identificador estable de la tanda asociada a esa fecha. |
-| `status` | `confirmed`, `pending`, `in_review`, `cancelled` o `expired`. El mapeo a estados reales está pendiente. |
+| `status` | `pending_payment`, `payment_review`, `paid`, `cancelled`, `expired`, `attended` o `no_show`. |
 | `checkedInAt` | `null` si no hay asistencia; de lo contrario, la primera hora en formato ISO 8601 UTC. |
 
 Los campos de reserva deberán venir del módulo de reservas. `checkedInAt` es
@@ -67,8 +69,8 @@ cambiar la fecha operativa `2026-09-25`.
   las nuevas marcaciones. No hay persistencia, sincronización ni modo sin conexión.
 - La instancia es una fotografía inicial: no recibe cancelaciones ni cambios de
   pago posteriores. No debe usarse para controlar acceso real.
-- Acordar qué significa `confirmed`, cuándo emitir/habilitar el QR y cómo tratar
-  pagos en revisión. La regla de rechazo actual es provisional.
+- Persistir la validación de `paid` y su pago aprobado en una transacción, junto
+  con asistencia única y autor. Una reserva en revisión no habilita acceso.
 - Definir la ventana de llegada: aquí se compara la tanda seleccionada, pero no
   se comprueba si está en curso o próxima a iniciar.
 - Acordar asistencia por grupo o por participante. Aquí se marca toda la reserva.
@@ -78,4 +80,8 @@ cambiar la fecha operativa `2026-09-25`.
   actuales y escritura atómica persistente que impida duplicados concurrentes.
 
 No incluye generación o lectura de QR, cámara, correos, ausencias automáticas,
-servicios externos ni cambios al flujo de reservas o pagos.
+servicios externos ni cambios al flujo de reservas o pagos. Las reglas nuevas
+de primera/segunda vuelta por participante están en `lib/operations/rules.ts`;
+este prototipo de check-in por grupo no demuestra elegibilidad individual.
+
+Ver `docs/OPERATIONS_RODRIGO.md` para el alcance, avance y dependencias reales.
