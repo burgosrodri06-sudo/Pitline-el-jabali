@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Brand from "@/components/layout/Brand";
 import NavLink from "@/components/layout/NavLink";
@@ -10,11 +11,13 @@ import {
   CalendarDays,
   Close,
   CreditCard,
+  LogOut,
   Menu,
   Package,
   ScanLine,
   Ticket,
 } from "@/components/ui/icons";
+import { signOut } from "@/services/auth.service";
 
 const icons = {
   scan: ScanLine,
@@ -34,6 +37,7 @@ const itemClass =
 // Navegación de Race Control: barra lateral en escritorio, panel desplegable en móvil.
 // Solo presenta enlaces; cada página conserva su propio guard de rol en el servidor.
 export function RaceControlNav({ items, roleLabel }: { items: RaceControlItem[]; roleLabel?: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
 
@@ -48,6 +52,14 @@ export function RaceControlNav({ items, roleLabel }: { items: RaceControlItem[];
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  // Mismo flujo que UserMenu: cerrar sesión y volver al inicio.
+  async function handleSignOut() {
+    setOpen(false);
+    await signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <aside className="sticky top-0 z-30 border-b border-line bg-surface lg:h-dvh lg:border-r lg:border-b-0">
@@ -99,6 +111,10 @@ export function RaceControlNav({ items, roleLabel }: { items: RaceControlItem[];
             <ArrowUpRight size={18} />
             Sitio público
           </NavLink>
+          <button type="button" onClick={handleSignOut} className={`${itemClass} w-full text-left`}>
+            <LogOut size={18} />
+            Cerrar sesión
+          </button>
         </div>
       </div>
     </aside>

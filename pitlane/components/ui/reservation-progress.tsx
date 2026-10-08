@@ -11,11 +11,18 @@ const reached: Record<string, number> = {
   attended: 4,
 };
 
+// Estados que no siguen el avance normal: frase completa en lugar de la barra.
+const closedMessages: Record<string, string> = {
+  cancelled: "Esta reserva fue cancelada.",
+  expired: "Este apartado venció.",
+  no_show: "No se registró asistencia en esta tanda.",
+};
+
 export function ReservationProgress({ status }: { status: string }) {
   const done = reached[status];
   if (done === undefined) {
     // Cancelada, expirada o no asistió: no se dibuja un avance que no ocurrió.
-    return <p className="text-sm text-muted">Esta reserva quedó {statusLabel(status).toLowerCase()}.</p>;
+    return <p className="text-sm text-muted">{closedMessages[status] ?? `Estado: ${statusLabel(status)}.`}</p>;
   }
   return (
     <ol className="grid grid-cols-4 gap-1.5" aria-label="Avance de la reserva">
