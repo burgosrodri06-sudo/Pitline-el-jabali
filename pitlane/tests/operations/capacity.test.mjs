@@ -73,28 +73,27 @@ test("historial de asistencia conserva su protección y el cálculo interno no q
 });
 
 test("upgrade desde el orden remoto reportado: comprobantes antes de operaciones y corrección", async () => {
-  const operations = await readFile(new URL("../../supabase/migrations/20261007182818_rodrigo_operations.sql", import.meta.url), "utf8");
+  const operations = await readFile(new URL("../../supabase/migrations/20261008003200_rodrigo_operations.sql", import.meta.url), "utf8");
   const correction = await readFile(new URL("../../supabase/migrations/20261008003300_align_operations_capacity_guard.sql", import.meta.url), "utf8");
   const upgrade = new PGlite();
   try {
-    // Load the same files verbatim, delaying only the unapplied operations file
-    // until after receipts, matching the history reported by Andres.
+    // Verify the natural filename order; never reorder migrations in the test.
+    const applied = [];
     await bootstrap({ exec: async sql => {
-      if (sql === operations) return;
-      if (sql === correction) {
+      if (sql === operations) {
         const state = (await upgrade.query("select to_regclass('public.payment_receipt_attempts') receipts,to_regclass('public.operation_slot_closures') operations")).rows[0];
         assert.ok(state.receipts);
         assert.equal(state.operations, null);
-        await upgrade.exec("begin");
-        try {
-          await upgrade.exec(operations);
-          await upgrade.exec(correction);
-          await upgrade.exec("commit");
-        } catch (error) { await upgrade.exec("rollback"); throw error; }
-        return;
+        applied.push("operations");
+      }
+      if (sql === correction) {
+        assert.deepEqual(applied, ["operations"]);
+        assert.ok((await upgrade.query("select to_regclass('public.operation_slot_closures') operations")).rows[0].operations);
+        applied.push("correction");
       }
       return upgrade.exec(sql);
     }});
+    assert.deepEqual(applied, ["operations", "correction"]);
     const ids = await fixture(upgrade, { capacity: 10, track: 2 });
     await upgrade.query("update profiles set role='kre_admin' where id=$1", [ids.other]);
     for (const channel of ["track", "web"]) await upgrade.query(

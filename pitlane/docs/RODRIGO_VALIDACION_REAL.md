@@ -1,5 +1,14 @@
 # Cierre de la entrega de Rodrigo
 
+## Orden de migraciones ajustado para el PR
+
+A petición de Andrés, la migración pendiente de operaciones se renombró a
+`20261008003200_rodrigo_operations.sql`, sin cambiar el SQL. Queda después de
+comprobantes (`20261008000000`) y antes de la corrección (`20261008003300`).
+La prueba carga el orden natural de archivos y comprueba las dependencias.
+Sigue pendiente que Gabriel apruebe el cambio de la fórmula compartida de cupos;
+no se atribuye esa aprobación a las pruebas automáticas.
+
 ## Corrección del hallazgo de capacidad de Andrés
 
 El informe `REVISION_PR14_RODRIGO.md` detectó una reducción indebida de 10 a 8

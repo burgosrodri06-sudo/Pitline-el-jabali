@@ -74,12 +74,21 @@ registrado. Antes del despliegue, revisar ese historial y el dry-run de la CLI:
 deben aplicarse operaciones y después esta corrección. No ejecutar solamente el
 archivo correctivo ni volver a ejecutar migraciones ya registradas.
 
-`20261007182818_rodrigo_operations.sql` se creó con
-`npx supabase migration new rodrigo_operations`. Agrega cierre operativo, autor
+`20261008003200_rodrigo_operations.sql` se creó originalmente con
+`npx supabase migration new rodrigo_operations` y se renombró, sin cambiar su SQL,
+desde `20261007182818` a petición de Andrés: aún no estaba aplicada ni mergeada.
+Agrega cierre operativo, autor
 de créditos/finalización, idempotencia y restricciones de asistencia/pagos.
-No recrea tablas del catálogo ni de reservas. Sustituye el archivo de esta rama
-`20261005190815_rodrigo_operations.sql`, todavía no mergeado ni aplicado por esta
-entrega, para ordenar la migración después de la extensión web ya integrada.
+No recrea tablas del catálogo ni de reservas. El orden natural de los archivos es:
+`20261008000000_payment_receipt_upload.sql` →
+`20261008003200_rodrigo_operations.sql` →
+`20261008003300_align_operations_capacity_guard.sql`.
+La prueba de actualización verifica ese orden sin reorganizar los archivos.
+
+**Revisión pendiente de Gabriel:** aprobar explícitamente el cambio compartido en
+`slot_available_spots`: contar `attended/no_show` y descontar el máximo entre el
+apartado y las ventas de pista. Su motor `create_reservation` depende de esa
+función; las pruebas de integración aprobadas no sustituyen su revisión.
 
 RPC: `operations_review_payment`, `operations_check_in`,
 `operations_complete_ride`, `operations_close_slot`, `operations_track_sale`,
