@@ -104,10 +104,6 @@ export default function BookingWizard({ initial = {}, principalName = "", authen
   return (
     <div lang="es-SV" className={styles.page}>
       <a href="#booking" className={styles.skipLink}>Saltar a la reserva</a>
-      <header className={styles.header}>
-        <div className={styles.brand}>PIT<span>LANE</span><span className={styles.brandSlash} aria-hidden="true">{"//"}</span></div>
-        <div className={styles.venue}>EL JABALÍ<span>Autódromo Internacional · El Salvador</span></div>
-      </header>
 
       <main className={`mx-auto w-full max-w-7xl px-5 py-10 sm:px-10 sm:py-14 ${styles.main}`}>
         <div className={styles.hero}>

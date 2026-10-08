@@ -1,4 +1,4 @@
-.page { min-height: 100vh; background: #0c0c0e; color: #f4f3ef; font-family: var(--font-geist-sans), Arial, sans-serif; color-scheme: dark; }
+.page { min-height: 100vh; background: #0c0c0e; color: #f4f3ef; font-family: var(--font-barlow), Arial, sans-serif; color-scheme: dark; }
 .page button { cursor: pointer; transition: background-color 160ms, border-color 160ms; }
 .page button:disabled { cursor: not-allowed; }
 .page button:focus-visible, .page a:focus-visible, .page input:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
@@ -13,7 +13,7 @@
 .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 36px; }
 .eyebrow { color: #b1b1ba; font-size: 10px; font-weight: 750; letter-spacing: 2px; margin-bottom: 14px; }
 .hero .eyebrow { color: #ed3855; }
-.hero h1 { font-family: Impact, "Arial Narrow", var(--font-geist-sans), sans-serif; font-size: clamp(48px, 7vw, 88px); font-weight: 950; letter-spacing: -2px; line-height: .98; }
+.hero h1 { font-family: Impact, "Arial Narrow", var(--font-barlow), sans-serif; font-size: clamp(48px, 7vw, 88px); font-weight: 950; letter-spacing: -2px; line-height: .98; }
 .hero h1 span { color: #c8102e; }
 .intro { color: #b1b1ba; font-size: 14px; margin-top: 22px; line-height: 1.8; }
 .raceFacts { border-left: 3px solid #c8102e; padding: 8px 0 8px 20px; margin-bottom: 5px; }
@@ -28,7 +28,7 @@
 .steps button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 18px 0; border-bottom: 2px solid #38383d; color: #c0c0c6; font-size: 13px; font-weight: 650; text-align: left; }
 .steps button[aria-current] { color: white; border-color: #c8102e; }
 .steps button:disabled { color: #797981; }
-.stepNumber { font-family: var(--font-geist-mono), monospace; font-size: 11px; }
+.stepNumber { font-family: ui-monospace, monospace; font-size: 11px; }
 .steps button[aria-current] .stepNumber { color: #fa4563; }
 .bookingLayout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 64px; align-items: start; scroll-margin-top: 24px; }
 .stage h2 { font-size: clamp(23px, 3vw, 29px); font-weight: 800; letter-spacing: -1px; line-height: 1.2; }
