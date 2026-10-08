@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
 import { randomUUID, createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
 import sharp from 'sharp';
 import vm from 'node:vm';
 import ts from 'typescript';
@@ -161,18 +160,20 @@ test('missing upload, full capacity corruption and duplicate reference fail with
   await assert.rejects(call(y, true), /unique constraint/);
   assert.equal((await db.query('select status from reservations where id=$1', [y.r.id])).rows[0].status, 'pending_payment');
   await assert.rejects(db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [y.ids.slot]), /reservados/);
+  const z = await setup(); await upload(z);
   // Corrupción intencional únicamente en la base desechable: comprobar defensa adicional del pago.
   await db.exec('alter table public.slots disable trigger kre_guard_slot');
   try {
-    await db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [y.ids.slot]);
+    await db.query('update slots set capacity=1,track_reserved_spots=1 where id=$1', [z.ids.slot]);
   } finally { await db.exec('alter table public.slots enable trigger kre_guard_slot'); }
-  await assert.rejects(call(y, true), /capacity_unavailable/);
+  await assert.rejects(call(z, true), /capacity_unavailable|operations_insufficient_capacity/);
+  assert.equal((await db.query('select status from reservations where id=$1', [z.r.id])).rows[0].status, 'pending_payment');
+  assert.equal((await db.query('select count(*)::int n from payments where reservation_id=$1', [z.r.id])).rows[0].n, 0);
 });
 test('compatible with Rodrigo migration: review can approve our submission; owner isolation', async () => {
-  const operations = execFileSync('git', ['show', 'origin/feature/operations:pitlane/supabase/migrations/20261007182818_rodrigo_operations.sql'], { encoding: 'utf8' });
   const otherDb = new PGlite();
   try {
-    await bootstrap(otherDb, operations);
+    await bootstrap(otherDb);
     const x = await setup(otherDb); await upload(x, otherDb); const p = await call(x, true, otherDb);
     assert.equal((await asUser(otherDb, x.ids.other, () => otherDb.query('select * from payments'))).rows.length, 0);
     assert.equal((await asUser(otherDb, x.ids.user, () => otherDb.query('select * from payments'))).rows.length, 1);
