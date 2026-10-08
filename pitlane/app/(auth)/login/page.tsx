@@ -8,6 +8,7 @@ import { getHomeForRole } from "@/lib/auth/home";
 import { getProfile, resendVerification, signIn } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 import { useNextPath, withNext } from "@/lib/auth/next-path";
+import { ActiveSessionGate } from "@/components/auth/ActiveSessionGate";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export default function LoginPage() {
   }
 
   return (
+    <ActiveSessionGate>
     <>
       <AuthTitle title="Inicia sesión" subtitle="Para continuar con tu reserva." />
 
@@ -104,5 +106,6 @@ export default function LoginPage() {
         </Link>
       </p>
     </>
+    </ActiveSessionGate>
   );
 }

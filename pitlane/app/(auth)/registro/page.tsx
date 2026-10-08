@@ -7,6 +7,7 @@ import { AuthField, AuthTitle, PasswordField, primaryButton } from "@/components
 import { signUp } from "@/services/auth.service";
 import { translateAuthError } from "../errors";
 import { useNextPath, withNext } from "@/lib/auth/next-path";
+import { ActiveSessionGate } from "@/components/auth/ActiveSessionGate";
 
 type Errors = Partial<Record<"name" | "email" | "phone" | "password" | "confirm" | "terms", string>>;
 
@@ -67,6 +68,7 @@ export default function RegistroPage() {
   }
 
   return (
+    <ActiveSessionGate>
     <>
       <AuthTitle title="Crea tu cuenta" subtitle="La necesitas para reservar tu turno en pista." />
 
@@ -123,5 +125,6 @@ export default function RegistroPage() {
         </Link>
       </p>
     </>
+    </ActiveSessionGate>
   );
 }
