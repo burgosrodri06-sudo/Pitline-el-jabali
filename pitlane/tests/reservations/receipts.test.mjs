@@ -41,6 +41,26 @@ test('real JPEG/PNG decoded, normalized and deterministic; invalid/truncated/ove
   }
   await assert.rejects(boundedReceiptForm(new Request('https://example.test', { method: 'POST', body: Buffer.alloc(MAX_RECEIPT_BYTES + 65537) })), /invalid_file/);
 });
+test('file signature gate: only JPEG/PNG magic bytes reach sharp; WebP, renamed PDF and cut PNG signature never do', async () => {
+  let calls = 0;
+  const spy = (...args) => { calls++; return sharp(...args); };
+  const source = await readFile(new URL('../../domain/reservations/receipt-file.ts', import.meta.url), 'utf8');
+  const exports = {};
+  vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText,
+    { exports, Error, Uint8Array, Buffer, Response, require: name => ({ sharp: { default: spy }, 'node:crypto': { createHash } })[name] });
+  const image = format => sharp({ create: { width: 2, height: 2, channels: 3, background: 'red' } }).toFormat(format).toBuffer();
+  for (const format of ['png', 'jpeg']) {
+    calls = 0;
+    assert.equal((await sharp((await exports.normalizeReceipt(await image(format))).bytes).metadata()).format, 'png');
+    assert.ok(calls > 0);
+  }
+  const png = await image('png');
+  for (const bytes of [await image('webp'), Buffer.from('%PDF-1.7\n% receipt.png\n'), png.subarray(0, 4), Buffer.concat([png.subarray(0, 7), Buffer.from([0]), png.subarray(8)])]) {
+    calls = 0;
+    await assert.rejects(exports.normalizeReceipt(bytes), /receipt_invalid_file/);
+    assert.equal(calls, 0);
+  }
+});
 test('upload success with ambiguous SQL result retries without another payment or deleting object', async () => {
   let committed = false; let uploads = 0; const id = randomUUID();
   const deps = { prepare: async () => committed ? { submitted: true, paymentId: id } : { submitted: false, objectPath: 'private' },

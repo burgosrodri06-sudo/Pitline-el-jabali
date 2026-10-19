@@ -61,6 +61,7 @@ export function testBookingEnabled(env: Record<string, string | undefined>): boo
   return env.RESERVATIONS_ENVIRONMENT === 'staging'
     && env.RESERVATIONS_TEST_ENABLED === 'true'
     && env.VERCEL_ENV !== 'production'
+    && env.PITLANE_ENV !== 'production'
     && Boolean(env.RESERVATIONS_TEST_SUPABASE_URL)
     && env.RESERVATIONS_TEST_SUPABASE_URL === env.NEXT_PUBLIC_SUPABASE_URL;
 }

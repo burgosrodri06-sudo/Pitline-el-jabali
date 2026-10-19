@@ -28,6 +28,14 @@ test('booking is closed by default and production cannot use staging opt-in on V
   assert.equal(testBookingEnabled(env), true);
   for (const change of [{ RESERVATIONS_ENVIRONMENT: 'production' }, { VERCEL_ENV: 'production' }, { RESERVATIONS_TEST_ENABLED: 'false' }, { NEXT_PUBLIC_SUPABASE_URL: 'https://shared.supabase.co' }]) assert.equal(testBookingEnabled({ ...env, ...change }), false);
 });
+test('PITLANE_ENV=production closes test booking on any host; staging keeps previous behavior', () => {
+  const env = { RESERVATIONS_ENVIRONMENT: 'staging', RESERVATIONS_TEST_ENABLED: 'true', RESERVATIONS_TEST_SUPABASE_URL: 'https://test.supabase.co', NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co' };
+  assert.equal(testBookingEnabled({ ...env, PITLANE_ENV: 'production' }), false);
+  assert.equal(testBookingEnabled({ ...env, PITLANE_ENV: 'staging' }), testBookingEnabled(env));
+  assert.equal(testBookingEnabled({ ...env, PITLANE_ENV: 'staging' }), true);
+  assert.equal(testBookingEnabled({ ...env, PITLANE_ENV: 'staging', VERCEL_ENV: 'production' }), false);
+  assert.equal(testBookingEnabled({ ...env, VERCEL_ENV: 'production' }), false);
+});
 test('action boundary rejects disabled or invalid inputs before invoking service', async () => {
   let calls = 0;
   const reserve = async () => { calls++; return { ok: true, reservation: receipt() }; };

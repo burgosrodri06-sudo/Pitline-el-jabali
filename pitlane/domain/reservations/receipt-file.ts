@@ -2,9 +2,15 @@ import sharp from 'sharp';
 import { createHash } from 'node:crypto';
 
 export const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+const JPEG_SIGNATURE = [0xff, 0xd8, 0xff];
+const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+const hasSignature = (bytes: Uint8Array, signature: number[]) => signature.every((b, i) => bytes[i] === b);
+
 /** Proposed test policy: decode real JPEG/PNG pixels, strip metadata, emit PNG. */
 export async function normalizeReceipt(bytes: Uint8Array) {
   if (!bytes.byteLength || bytes.byteLength > MAX_RECEIPT_BYTES) throw new Error('receipt_invalid_file');
+  // Magic-byte check so untrusted bytes of any other type never reach the native decoder.
+  if (!hasSignature(bytes, JPEG_SIGNATURE) && !hasSignature(bytes, PNG_SIGNATURE)) throw new Error('receipt_invalid_file');
   try {
     const image = sharp(bytes, { failOn: 'warning', limitInputPixels: 16_000_000 });
     const metadata = await image.metadata();
